@@ -1,5 +1,6 @@
 import numpy as np
 import scipy as sp
+import csv
 import math
 from typing import Dict, List, Tuple, Callable, Union, FrozenSet
 from numpy.typing import NDArray, ArrayLike
@@ -35,7 +36,8 @@ class Tree:
         Returns:
             TreeDatastructure: The tree datastructure built from the file.
         """
-        with open(file_name,"r") as filestream:
+        with open(file_name, newline='') as filestream:
+            reader = csv.reader(filestream)
 
             parameters = {}
             distributions = {}
@@ -46,9 +48,10 @@ class Tree:
             edges = []
             nodes = set()
 
-            for line in filestream:
-                curr = line.split(",")
-                curr[len(curr)-1] = curr[len(curr)-1].replace('\n','')
+            for curr in reader:
+                if not curr:
+                    continue
+                
                 edge = frozenset({curr[0],curr[1]})
                 edges.append(edge)
                 nodes = nodes.union(edge)

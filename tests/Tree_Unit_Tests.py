@@ -3,14 +3,14 @@ import numpy as np
 import tempfile
 import os
 import copy
-from tree_source_localization.Tree import Tree
+from tree_source_localization.Tree import Tree # type: ignore
 
 
 
 class TestTree(unittest.TestCase):
 
     def setUp(self):
-        self.temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w+')
+        self.temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w+', suffix = 'csv')
         self.temp_file.write("""A,B,N,1.0,0.5
 B,C,E,2.0
 C,D,U,1.0,3.0
@@ -85,7 +85,7 @@ E,F,C,1.0
             self.assertIsInstance(val, float)
 
     def test_equivalent_class_output_validity(self):
-        outfile = "test_equiv_class_tree.txt"
+        outfile = "test_equiv_class_tree.csv"   
         new_obs = self.tree.Equivalent_Class(self.observers[0], outfile)
         self.assertTrue(set(new_obs).issubset(set(self.observers)))
         self.assertTrue(os.path.exists(outfile))

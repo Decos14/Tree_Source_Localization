@@ -4,7 +4,7 @@ import numpy as np
 import copy
 import tempfile
 import os
-from tree_source_localization.Tree import Tree
+from tree_source_localization.Tree import Tree # type: ignore
 
 
 
@@ -15,7 +15,7 @@ class TestTreeRegression(unittest.TestCase):
         with open("regression_test_data.pkl", "rb") as file:
             cls.saved_results = pickle.load(file)
 
-        cls.temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w+')
+        cls.temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w+', suffix = 'csv')
         cls.temp_file.write("""A,B,N,1.0,0.5
 B,C,E,2.0
 C,D,U,1.0,3.0
