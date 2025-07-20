@@ -35,7 +35,6 @@ class Tree:
         """
         with open(file_name,"r") as filestream:
 
-            tree = {}
             parameters = {}
             distributions = {}
             edge_delays = {}
@@ -64,7 +63,7 @@ class Tree:
                     edge_mgfs[edge] = lambda t, mu=mu, sigma2=sigma2: 1 if np.isclose(t, 0) else MGF_Functions.PositiveNormalMGF(t, mu, sigma2)
                     edge_mgf_derivatives[edge] =  lambda t, mu=mu, sigma2=sigma2: 1 if np.isclose(t, 0) else MGF_Functions.PositiveNormalMGFDerivative(t, mu, sigma2)
                     edge_mgf_derivatives_2[edge] = lambda t, mu=mu, sigma2=sigma2: 1 if np.isclose(t, 0) else MGF_Functions.PositiveNormalMGFDerivative2(t,mu,sigma2)
-                    tree[edge] = None
+
                 if dist == 'E':
                     lam = float(curr[3])
                     parameters[edge] = {
@@ -73,7 +72,7 @@ class Tree:
                     edge_mgfs[edge] = lambda t, lam=lam: MGF_Functions.ExponentialMGF(t, lam)
                     edge_mgf_derivatives[edge] =lambda t, lam=lam: MGF_Functions.ExponentialMGFDerivative(t, lam)
                     edge_mgf_derivatives_2[edge] = lambda t, lam=lam: MGF_Functions.ExponentialMGFDerivative2(t, lam)
-                    tree[edge] = None
+
                 if dist == 'U':
                     a = float(curr[3])
                     b = float(curr[4])
@@ -85,7 +84,6 @@ class Tree:
                     edge_mgf_derivatives[edge] = lambda t, start=a, stop=b: 1 if np.isclose(t, 0) else MGF_Functions.UniformMGFDerivative(t, start, stop)
                     edge_mgf_derivatives_2[edge] = lambda t, start=a, stop=b: 1 if np.isclose(t, 0) else MGF_Functions.UniformMGFDerivative2(t, start, stop)
 
-                    tree[edge] = None
                 if dist == 'P':
                     lam = float(curr[3])
                     parameters[edge] = {
@@ -94,8 +92,7 @@ class Tree:
                     edge_mgfs[edge] = lambda t, lam=lam: MGF_Functions.PoissonMGF(t, lam)
                     edge_mgf_derivatives[edge] = lambda t, lam=lam: MGF_Functions.PoissonMGFDerivative(t, lam)
                     edge_mgf_derivatives_2[edge] = lambda t, lam=lam: MGF_Functions.PoissonMGFDerivative2(t, lam)
-
-                    tree[edge] = None
+                    
                 if dist == 'C':
                     sigma2 = float(curr[3])
                     parameters[edge] = {
@@ -105,9 +102,6 @@ class Tree:
                     edge_mgf_derivatives[edge] = lambda t, sigma2=sigma2: 1 if np.isclose(t, 0) else MGF_Functions.AbsoluteCauchyMGFDerivative(t,sigma2)
                     edge_mgf_derivatives_2[edge] = lambda t, sigma2=sigma2: 1 if np.isclose(t, 0) else MGF_Functions.AbsoluteCauchyMGFDerivative2(t,sigma2)
 
-                    tree[edge] = None
-
-            self.tree = tree
             self.edges = edges
             self.nodes = list(nodes)
             self.distributions = distributions
@@ -352,10 +346,10 @@ class Tree:
             lam = -1
             prod = 1
             for i, edge in enumerate(path):
-                if i == 0:
-                    lam = self.parameters[edge]['lambda']
                 if self.distributions[edge] != 'E':
                     raise ValueError(f"Non exponential distribution: {self.distributions[edge]}. Distribution must be exponential")
+                if i == 0:
+                    lam = self.parameters[edge]['lambda']
                 prod *= 1/(lam + np.matmul(u,self.A[source][:,i]))
                 Theta[i,i] = -1*(lam + np.matmul(u,self.A[source][:,i]))
                 if i != len(path)-1:
@@ -461,4 +455,4 @@ class Tree:
         m = np.zeros(len(self.nodes))
         for i, node in enumerate(self.nodes):
             m[i] = sp.optimize.minimize(self.obj_func, np.random.rand(len(self.observers)), args = (node,method),bounds = [(0,None) for i in range(len(self.observers))],method='Nelder-Mead').fun
-            return self.nodes[np.argmax(m)]
+        return self.nodes[np.argmax(m)]
