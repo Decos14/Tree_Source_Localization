@@ -3,7 +3,7 @@ import scipy as sp
 import csv
 import math
 from typing import Dict, List, Tuple, Callable, Union, FrozenSet
-from numpy.typing import NDArray, ArrayLike
+from numpy.typing import ArrayLike
 from tree_source_localization import MGF_Functions
 
 
@@ -21,22 +21,20 @@ class Tree:
         self.build_connection_tree()
         self.infection_times = infection_times
         self.observers = observers
-        self.A = self.build_A_matrix()
+        self.build_A_matrix()
 
     def build_tree(
         self, 
         file_name: str
     ) -> TreeDatastructure:
         """
-        A function to build the tree data structure from a file
+        Builds the tree data structure from a CSV file, initializing edges, nodes,
+        distributions, parameters, delays, and moment generating functions as instance variables.
 
         Args:
-            file_name (str): A string containing the path to the file to build the tree from.
-
-        Returns:
-            TreeDatastructure: The tree datastructure built from the file.
+            file_name (str): Path to the CSV file describing the tree.
         """
-        with open(file_name, newline='') as filestream:
+        with open(file_name, newline='', encoding='utf-8') as filestream:
             reader = csv.reader(filestream)
 
             parameters = {}
@@ -51,7 +49,7 @@ class Tree:
             for curr in reader:
                 if not curr:
                     continue
-                
+
                 edge = frozenset({curr[0],curr[1]})
                 edges.append(edge)
                 nodes = nodes.union(edge)
@@ -118,17 +116,11 @@ class Tree:
         
     def build_connection_tree(self) -> None:
         """
-        Takes in a tree datastructure and returns the adjacency dictionary of the topology of the tree
-
-        Args:
-            tree (TreeDatastructure): The tree datastructure to compute the adjacency dictionary of.
-
-        Returns:
-            None: Sets self.connection tree
+        Builds an adjacency dictionary representing the tree topology and assigns it
+        to the instance variable `self.connection_tree`.
         """
         connection_tree = {}
         for edge in self.edges:
-
             nodes = []
             for node in edge:
                 nodes.append(node)
@@ -143,14 +135,12 @@ class Tree:
                 connection_tree[nodes[1]].append(nodes[0])
         self.connection_tree = connection_tree
     
-    def build_A_matrix(self) -> NDArray[np.integer]:
+    def build_A_matrix(self) -> None:
         """
-        Constructs the A tensor of the tree with a specific observer set
-
-        Returns:
-            NDArray[np.int]: A matrix with 1 in an entry if the edge is on the path between the corresponding observer and potential source
+        Constructs the A-matrix tensor of the tree using the observers and assigns it
+        to the instance variable `self.A`.
         """
-        A = {}
+        A_matrix = {}
         for _, node in enumerate(self.nodes):
             A_layer= np.zeros((len(self.observers),len(self.edges)))
             for j, obs in enumerate(self.observers):
@@ -158,20 +148,21 @@ class Tree:
                     path = self.path_edge(self.DFS(node,obs))
                     if edge in path:
                         A_layer[j,k]=1  
-            A[node] = A_layer 
-        return A
+            A_matrix[node] = A_layer 
+        self.A = A_matrix
     
     def simulate_edge(
         self,
         edge: TreeEdge
     ) -> Union[float,int]:
         """
-        Simulate the edge delay of a specific edge
+        Simulates the edge delay for a specific edge using its distribution and parameters.
 
         Args:
-            edge (TreeEdge): The edge to simulate
+            edge (TreeEdge): The edge to simulate.
+
         Returns:
-            float: The edge delay of the given edge
+            Union[float,int]: Simulated delay for the edge, depending on the distribution.
         """
         distribution = self.distributions[edge]
         parameters = self.parameters[edge]
@@ -192,7 +183,8 @@ class Tree:
 
     def simulate(self) -> None:
         """
-        Simulate all of the edges of the tree and update the tree
+        Simulates delay values for all edges in the tree and updates the instance
+        variable `self.edge_delays` with these simulated values.
         """
         for edge in self.edges:
             self.edge_delays[edge]=self.simulate_edge(edge)
@@ -203,14 +195,14 @@ class Tree:
         observer: str
     ) -> List[str]:
         """
-        Runs a DFS search on the tree to find the path between an observer and a potential source node
+        Finds the path from a source node to an observer using depth-first search.
 
         Args:
-            source (str): The potential source node.
-            observer (str): The observer.
+            source (str): The starting node.
+            observer (str): The destination (observer) node.
 
         Returns:
-            List[str]: A list containing the sequence of nodes that form the path from the source to the observer.
+            List[str]: List of nodes representing the path from source to observer.
         """
         stack = [(source, [source])]
         visited = set()
@@ -227,13 +219,13 @@ class Tree:
         path: List[str]
     ) -> List[TreeEdge]:
         """
-        A function that converts a path from a sequence of nodes to a sequence of edges
+        Converts a path given as a sequence of nodes into a sequence of edges.
 
         Args:
-            path (List[str]): A list of nodes forming a path through the tree
-        
+            path (List[str]): Sequence of nodes forming a path.
+
         Returns:
-            List[TreeEdge]: A list of edges forming a path through the tree
+            List[TreeEdge]: Sequence of edges representing the path.
         """
         edges = []
         for i in range(len(path)-1):
@@ -246,13 +238,11 @@ class Tree:
         source: str
     ) -> None:
         """
-        Simulates the infection from a given source node to the observers
+        Simulates the infection spread times from a source node to all observers and
+        stores the results in the instance variable `self.infection_times`.
 
         Args:
-            source (str): Name of the source node to simulate the infection from
-        
-        Returns:
-            None: Updates the value in self.infection_times
+            source (str): The source node from which the infection starts.
         """
         infection_times = {}
 
@@ -273,15 +263,15 @@ class Tree:
         source: str
     ) -> float:
         """
-        Computes the Joint Moment Generating Function of the infection times of the observers
-        from a given source at a given value.
+        Computes the joint Moment Generating Function (MGF) of the infection times
+        for the observers from a given source node, evaluated at vector `u`.
 
         Args:
-            u (ArrayLike): The vector to evaluate the Joint MGF at
-            source: The potential source of the infection
+            u (ArrayLike): Vector to evaluate the joint MGF at.
+            source (str): Node assumed to be the infection source.
 
         Returns:
-            float: The value of the Joint MGF at u.
+            float: The value of the joint MGF at `u`.
         """
         mgf = 1
         for i,edge in enumerate(self.edges):
@@ -298,26 +288,22 @@ class Tree:
         method: int
     ) -> float:
         """
-        Compute (or approximate) the conditional Joint Moment Generating function given the first
-        infected observer, of the observers from the given source at a given value
+        Computes or approximates the conditional joint MGF of the observers given the
+        first infected observer, using a specified augmentation method.
 
         Args:
-            u (Arraylike[float]): The value to evaluate the conditional Joint MGF at.
-            source (str): The potential source to assume the infection began at.
-            obs_o: The name of the first infected observer.
-            method: The augmentation method to choose
-                    (1: Linear approximation,
-                     2: Exponential approximation,
-                     3: Exact solution for iid exponential delays)
+            u (ArrayLike): Vector to evaluate the conditional joint MGF at.
+            source (str): Assumed infection source node.
+            obs_o (str): The first observer infected.
+            method (int): Augmentation method to use:
+                1: Linear approximation,
+                2: Exponential approximation,
+                3: Exact solution for iid exponential delays.
 
         Returns:
-            float: the conditional Joint MGF evaluated at u.
+            float: Conditional joint MGF evaluated at `u`.
         """
         mgf = 1
-        val1 = -1
-        for i,node in enumerate(self.nodes):
-            if node == source:
-                val1 = i
 
         path  = self.path_edge(self.DFS(source, obs_o))
         for i,edge in enumerate(self.edges):
@@ -373,15 +359,15 @@ class Tree:
         outfile: str
     ) -> List[str]:
         """
-        Computes the Equivalence class of the tree that is sufficient for estimating the source
-        and where the true source is guaranteed to exist.
+        Computes the equivalence class of nodes sufficient for source estimation, based
+        on the first infected observer, and writes the relevant subtree edges to a file.
 
         Args:
-            first_obs (str): The name of the first infected observer.
-            outfile (str): The path of the file to write the equivalent class to.
-        
+            first_obs (str): The first observer infected.
+            outfile (str): File path where the equivalence class subtree will be written.
+
         Returns:
-            List[str]: A list of the observers that are still relevant.
+            List[str]: List of relevant observers within the equivalence class.
         """
         to_check = self.connection_tree[first_obs]
         nodes = set(first_obs)
@@ -400,12 +386,12 @@ class Tree:
             edge_nodes = list(edge)
             if edge_nodes[0] in nodes and edge_nodes[1] in nodes:
                 include_edge.append(edge)
-        with open(outfile, 'w') as file:
+        with open(outfile, 'w', encoding='utf-8') as file:
             for edge in include_edge:
                 file.write(f"{list(edge)[0]},{list(edge)[1]},{self.distributions[edge]},{','.join(map(str,self.parameters[edge].values()))}\n")
         return list(nodes.intersection(set(self.observers)))
-        
-    
+
+
     def obj_func(
         self,
         u: ArrayLike,
@@ -413,19 +399,19 @@ class Tree:
         augment: int = None
     ) -> float:
         """
-        The objective function to minimize to find the true source
+        Objective function used to identify the most likely infection source.
 
         Args:
-            u (ArrayLike): The vector to evaluate the objective function at.
-            source (str): The potential source to assume is the origin of the infection.
-            augment (int): What augmentation to use, default is None:
-                    (None: None,
-                     1: Linear approximation,
-                     2: Exponential approximation,
-                     3: Exact solution for iid exponential delays)
+            u (ArrayLike): Vector to evaluate the objective function at.
+            source (str): Candidate infection source node.
+            augment (int, optional): Augmentation method to apply (default is None):
+                None: No augmentation,
+                1: Linear approximation,
+                2: Exponential approximation,
+                3: Exact solution for iid exponential delays.
 
         Returns:
-            float: The value of the objective function at u
+            float: Value of the objective function at `u`.
         """
         val0 = self.joint_mgf(u, source)
         t = list(self.infection_times.values())
@@ -439,24 +425,24 @@ class Tree:
             val1 += tempval
         val = -1*(val1-val0)**2
         return val
-    
+
     def localize(
         self,
         method = None
     ) -> str:
         """
-        Localize the true source of an infection
+        Estimates the most likely infection source node by minimizing the objective function.
 
         Args:
-            method: The augmentation method, defaults to None.
-                    (None: None,
-                     1: Linear approximation,
-                     2: Exponential approximation,
-                     3: Exact solution for iid exponential delays)
+            method (int, optional): Augmentation method to use (default is None):
+                None: No augmentation,
+                1: Linear approximation,
+                2: Exponential approximation,
+                3: Exact solution for iid exponential delays.
 
         Returns:
-            str: The name of the predicted true source node.
-        """
+            str: Name of the predicted source node.
+"""
         m = np.zeros(len(self.nodes))
         for i, node in enumerate(self.nodes):
             m[i] = sp.optimize.minimize(self.obj_func, np.random.rand(len(self.observers)), args = (node,method),bounds = [(0,None) for i in range(len(self.observers))],method='Nelder-Mead').fun

@@ -62,7 +62,8 @@ E,F,C,1.0
 
     def test_A_matrix_match(self):
         saved_A = self.saved_results.get('A')
-        A_new = self.tree_new.build_A_matrix()
+        self.tree_new.build_A_matrix()
+        A_new = self.tree_new.A
         for node in saved_A:
             current_matrix = A_new[node]
             saved_matrix = saved_A[node]
