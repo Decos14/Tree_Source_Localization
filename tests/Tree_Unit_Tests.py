@@ -3,7 +3,8 @@ import numpy as np
 import tempfile
 import os
 import copy
-from Tree_refactor import Tree
+from tree_source_localization.Tree import Tree
+
 
 
 class TestTree(unittest.TestCase):

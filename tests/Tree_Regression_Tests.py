@@ -4,7 +4,8 @@ import numpy as np
 import copy
 import tempfile
 import os
-from Tree_refactor import Tree
+from tree_source_localization.Tree import Tree
+
 
 
 class TestTreeRegression(unittest.TestCase):

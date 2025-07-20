@@ -1,8 +1,10 @@
 import numpy as np
 import scipy as sp
-from typing import Dict, List, Tuple, Optional, Callable, Union, FrozenSet
+import math
+from typing import Dict, List, Tuple, Callable, Union, FrozenSet
 from numpy.typing import NDArray, ArrayLike
-import MGF_Functions
+from tree_source_localization import MGF_Functions
+
 
 # Structure is [(distribution, parameters), [mgf, mgf', mgf''], edge delay]
 TreeValue = List[Union[Union[Tuple[str, float], Tuple[str, float, float]], Tuple[Callable[[float], float], Callable[[float], float], Callable[[float],float]], float]]
@@ -359,7 +361,7 @@ class Tree:
             t = self.infection_times[obs_o]
             exp_Theta = sp.linalg.expm(t*Theta)
             g_t = -1*np.matmul(np.matmul(np.matmul(alpha, exp_Theta),Theta),np.ones((1,len(path),1)))
-            mgf *= g_t*(t**(len(path)-1))*np.exp(-1*lam*t)*(np.math.factorial(len(path)-1))*prod
+            mgf *= g_t*(t**(len(path)-1))*np.exp(-1*lam*t)*(math.factorial(len(path)-1))*prod
         return mgf
     
     def Equivalent_Class(
