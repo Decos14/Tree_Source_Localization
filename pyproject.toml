@@ -1,11 +1,12 @@
 [project]
 name = "Tree_Source_Localization"
 version = "0.1.0"
+readme = "README.md"
 description = "A package for source localization on tree infection networks"
 authors = [
     { name = "Devlin Costello", email = "devlin.costello@colorado.edu" }
 ]
-license ="GPL-3.0-or-later"
+license = "GPL-3.0-or-later"
 requires-python = ">=3.8"
 dependencies = [
     "numpy",
@@ -15,3 +16,7 @@ dependencies = [
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["tree_source_localization"]
+package-dir = {"" = "src"}
