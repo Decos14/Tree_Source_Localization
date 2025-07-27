@@ -105,12 +105,9 @@ E,F,C,1.0
         loc = self.tree.localize()
         self.assertIn(loc, self.tree.nodes)
 
-    def test_path_and_DFS_output_validity(self):
+    def test_path_and_search_output_validity(self):
         for obs in self.observers:
-            path = self.tree.DFS("A", obs)
-            self.assertEqual(path[0], "A")
-            self.assertEqual(path[-1], obs)
-            edges = self.tree.path_edge(path)
+            edges = self.tree.search.get_path("A", obs)
             for edge in edges:
                 self.assertIsInstance(edge, frozenset)
                 self.assertIn(edge, self.tree.edges)

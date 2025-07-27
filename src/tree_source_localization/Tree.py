@@ -4,6 +4,7 @@ import csv
 import math
 from typing import Dict, List, Tuple, Callable, Union, FrozenSet
 from numpy.typing import ArrayLike
+from .Search import _DepthFirstSearch
 from tree_source_localization import MGF_Functions
 
 
@@ -21,6 +22,7 @@ class Tree:
         self.build_connection_tree()
         self.infection_times = infection_times
         self.observers = observers
+        self.search = _DepthFirstSearch(self.connection_tree)
         self.build_A_matrix()
 
     def build_tree(
@@ -145,7 +147,7 @@ class Tree:
             A_layer= np.zeros((len(self.observers),len(self.edges)))
             for j, obs in enumerate(self.observers):
                 for k, edge in enumerate(self.edges):
-                    path = self.path_edge(self.DFS(node,obs))
+                    path = self.search.get_path(node,obs)
                     if edge in path:
                         A_layer[j,k]=1  
             A_matrix[node] = A_layer 
@@ -188,49 +190,6 @@ class Tree:
         """
         for edge in self.edges:
             self.edge_delays[edge]=self.simulate_edge(edge)
-
-    def DFS(
-        self,
-        source: str,
-        observer: str
-    ) -> List[str]:
-        """
-        Finds the path from a source node to an observer using depth-first search.
-
-        Args:
-            source (str): The starting node.
-            observer (str): The destination (observer) node.
-
-        Returns:
-            List[str]: List of nodes representing the path from source to observer.
-        """
-        stack = [(source, [source])]
-        visited = set()
-        while stack:
-            (vertex, path) = stack.pop()
-            if vertex not in visited:
-                if vertex == observer:
-                    return path
-                visited.add(vertex)
-                for neighbor in self.connection_tree[vertex]:
-                    stack.append((neighbor,path + [neighbor]))
-    
-    def path_edge(self,
-        path: List[str]
-    ) -> List[TreeEdge]:
-        """
-        Converts a path given as a sequence of nodes into a sequence of edges.
-
-        Args:
-            path (List[str]): Sequence of nodes forming a path.
-
-        Returns:
-            List[TreeEdge]: Sequence of edges representing the path.
-        """
-        edges = []
-        for i in range(len(path)-1):
-            edges.append(frozenset({path[i],path[i+1]}))
-        return edges
     
     #Simulates the infection from a given source node to an observer node
     def Infection_Simulation(
@@ -246,10 +205,9 @@ class Tree:
         """
         infection_times = {}
 
-        #Finds the path each observer to the source using DFS and then adds up the edge costs stored in the tree on those paths
+        #Finds the path each observer to the source using self.search and then adds up the edge costs stored in the tree on those paths
         for observer in self.observers:
-            path = self.DFS(source, observer)
-            edges = self.path_edge(path)
+            edges = self.search.get_path(source, observer)
             time = 0
             for edge in edges:
                 time += self.edge_delays[edge]
@@ -305,7 +263,7 @@ class Tree:
         """
         mgf = 1
 
-        path  = self.path_edge(self.DFS(source, obs_o))
+        path  = self.search.get_path(source, obs_o)
         for i,edge in enumerate(self.edges):
             if edge not in path:
                 tempval = np.matmul(u,self.A[source][:,i])
