@@ -14,7 +14,7 @@ All notable changes to this project will be documented in this file.
 - GPL-3.0-or-later license.
 
 ### Fixed
-- N/A — initial release.
+- N/A — initial release. 
 
 ### Deprecated
 - N/A — initial release.
