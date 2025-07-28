@@ -25,13 +25,13 @@ def ExponentialMGFDerivative2(t, lam):
     return -2*lam/((lam+t)**3)
 
 def UniformMGF(t, start, stop):
-    return (np.exp(-1*t*stop)-np.exp(-1*t*start))/(-1*t*(stop-start))
+    return 1 if np.isclose(t, 0) else (np.exp(-1*t*stop)-np.exp(-1*t*start))/(-1*t*(stop-start))
 
 def UniformMGFDerivative(t, start, stop):
-    return (start*np.exp(-1*t*start)-stop*np.exp(-1*t*stop))/(-1*t*(stop-start))
+    return (start+stop)/2 if np.isclose(t,0) else (np.exp(-1*t*start)*(start*t+1)-np.exp(-1*t*stop)*(stop*t+1))/((t**2)*(stop-start))
 
 def UniformMGFDerivative2(t, start, stop):
-    ((stop**2)*np.exp(-1*t*stop)-(start**2)*np.exp(-1*t*start))/(-1*t*(stop-start))
+    return (start**2+start*stop+stop**2) if np.isclose(t,0) else (np.exp(-1*t*start)*((start**2)*(t**2)+2*start*t+2)-np.exp(-1*t*stop)*((stop**2)*(t**2)+2*stop*t+2))/((t**3)*(stop-start))
 
 def PoissonMGF(t, lam):
     return np.exp(lam*(np.exp(-1*t)-1))
@@ -44,12 +44,15 @@ def PoissonMGFDerivative2(t, lam):
 
 def AbsoluteCauchyMGF(t, sigma2):
     sigma = np.sqrt(sigma2)
-    return (1/np.pi)*(2*sp.special.sici(t*sigma)[1]*np.sin(t*sigma)+np.cos(t*sigma)*(np.pi-2*sp.special.sici(t*sigma)[0]))
+    sin_integral, cos_integal = sp.special.sici(t*sigma)
+    return 1 if np.isclose(t, 0) else (1/np.pi)*(2*cos_integal*np.sin(t*sigma)+np.cos(t*sigma)*(np.pi-2*sin_integral))
 
 def AbsoluteCauchyMGFDerivative(t, sigma2):
     sigma = np.sqrt(sigma2)
-    return (sigma/np.pi)*(2*np.cos(t*sigma)*sp.special.sici(t*sigma)[1]-np.sin(t*sigma)*(np.pi-2*sp.special.sici(t*sigma)[0]))
+    sin_integral, cos_integal = sp.special.sici(t*sigma)
+    return (sigma/np.pi)*(2*np.cos(t*sigma)*cos_integal-np.sin(t*sigma)*(np.pi-2*sin_integral))
 
 def AbsoluteCauchyMGFDerivative2(t, sigma2):
     sigma = np.sqrt(sigma2)
-    return (sigma/(t*np.pi))*(2-2*t*sigma*sp.special.sici(t*sigma)[1]*np.sin(t*sigma)-t*sigma*np.cos(t*sigma)*(np.pi-2*sp.special.sici(sigma*t)[0]))
+    sin_integral, cos_integal = sp.special.sici(t*sigma)
+    return (sigma/(t*np.pi))*(2-2*t*sigma*cos_integal*np.sin(t*sigma)-t*sigma*np.cos(t*sigma)*(np.pi-2*sin_integral))

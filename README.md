@@ -30,9 +30,9 @@ Or clone the repository locally and install:
 
 Each line represents an edge with columns:
 
-| Index      | 1                  | 2                   | 3                      |4...                                         |
+| Index      | 1                  | 2                   | 3                      |4                                         |
 |------------|--------------------|---------------------|------------------------|---------------------------------------------|
-| Description| First node (string)| Second node (string)| Distribution type (str)|Distribution parameters (one or more floats) |
+| Description| First node (string)| Second node (string)| Distribution type (str)|Distribution parameters (one or more key, float pairs seperated by semicolons) |
 
 Distribution codes:
 
@@ -40,8 +40,14 @@ Distribution codes:
 - 'E': Exponential  
 - 'U': Uniform  
 - 'P': Poisson  
-- 'C': Absolute Cauchy  
+- 'C': Absolute Cauchy
 
+Example:
+```
+A,B,N,mu=3.0;sigma2=1.0
+A,C,E,lambda=0.5
+C,D,U,start=0;stop=5
+```
 ---
 
 ### Key Methods Documentation and Examples

@@ -8,8 +8,8 @@ def main():
     suite = unittest.TestSuite()
 
     # Load tests from both test files
-    unit_tests = loader.discover('.', pattern='Tree_Unit_Tests.py')
-    regression_tests = loader.discover('.', pattern='Tree_Regression_Tests.py')
+    unit_tests = loader.discover('.', pattern='*_Unit_Tests.py')
+    regression_tests = loader.discover('.', pattern='*_Regression_Tests.py')
 
     # Combine them into one suite
     suite.addTests(unit_tests)

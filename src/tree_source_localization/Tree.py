@@ -5,6 +5,7 @@ import math
 from typing import Dict, List, Tuple, Callable, Union, FrozenSet
 from numpy.typing import ArrayLike
 from .Search import _DepthFirstSearch
+from .EdgeDistribution import EdgeDistribution
 from tree_source_localization import MGF_Functions
 
 
@@ -39,82 +40,30 @@ class Tree:
         with open(file_name, newline='', encoding='utf-8') as filestream:
             reader = csv.reader(filestream)
 
-            parameters = {}
-            distributions = {}
-            edge_delays = {}
-            edge_mgfs = {}
-            edge_mgf_derivatives = {}
-            edge_mgf_derivatives_2 = {}
-            edges = []
-            nodes = set()
+            self.edges = []
+            self.nodes = set()
+            self.edge_distributions = {}
 
-            for curr in reader:
-                if not curr:
+            for row in reader:
+                if not row or row[0].startswith('#'):
                     continue
 
-                edge = frozenset({curr[0],curr[1]})
-                edges.append(edge)
-                nodes = nodes.union(edge)
-                edge_delays[edge] = 0
-                dist = curr[2]
-                distributions[edge] = dist
-                if dist == 'N':
-                    mu = float(curr[3])
-                    sigma2 = float(curr[4])
-                    parameters[edge] = {
-                        'mu': float(curr[3]),
-                        'sigma2': float(curr[4])
-                    }
-                    edge_mgfs[edge] = lambda t, mu=mu, sigma2=sigma2: 1 if np.isclose(t, 0) else MGF_Functions.PositiveNormalMGF(t, mu, sigma2)
-                    edge_mgf_derivatives[edge] =  lambda t, mu=mu, sigma2=sigma2: 1 if np.isclose(t, 0) else MGF_Functions.PositiveNormalMGFDerivative(t, mu, sigma2)
-                    edge_mgf_derivatives_2[edge] = lambda t, mu=mu, sigma2=sigma2: 1 if np.isclose(t, 0) else MGF_Functions.PositiveNormalMGFDerivative2(t,mu,sigma2)
+                node1, node2 = row[0], row[1]
+                dist_type = row[2]
+                raw_params = row[3]
 
-                if dist == 'E':
-                    lam = float(curr[3])
-                    parameters[edge] = {
-                        'lambda': float(curr[3])
-                    }
-                    edge_mgfs[edge] = lambda t, lam=lam: MGF_Functions.ExponentialMGF(t, lam)
-                    edge_mgf_derivatives[edge] =lambda t, lam=lam: MGF_Functions.ExponentialMGFDerivative(t, lam)
-                    edge_mgf_derivatives_2[edge] = lambda t, lam=lam: MGF_Functions.ExponentialMGFDerivative2(t, lam)
+                # Convert "mu=3.0;sigma2=1.0" → {'mu': 3.0, 'sigma2': 1.0}
+                param_dict = {
+                    k: float(v)
+                    for k, v in (item.split('=') for item in raw_params.split(';'))
+                }
 
-                if dist == 'U':
-                    a = float(curr[3])
-                    b = float(curr[4])
-                    parameters[edge] = {
-                        'start': float(curr[3]),
-                        'stop': float(curr[4])
-                    }
-                    edge_mgfs[edge] = lambda t, start=a, stop=b: 1 if np.isclose(t, 0) else MGF_Functions.UniformMGF(t, start, stop)
-                    edge_mgf_derivatives[edge] = lambda t, start=a, stop=b: 1 if np.isclose(t, 0) else MGF_Functions.UniformMGFDerivative(t, start, stop)
-                    edge_mgf_derivatives_2[edge] = lambda t, start=a, stop=b: 1 if np.isclose(t, 0) else MGF_Functions.UniformMGFDerivative2(t, start, stop)
+                edge = frozenset({node1, node2})
+                self.edges.append(edge)
+                self.nodes.update(edge)
+                self.edge_distributions[edge] = EdgeDistribution(dist_type, param_dict)
 
-                if dist == 'P':
-                    lam = float(curr[3])
-                    parameters[edge] = {
-                        'lambda': float(curr[3])
-                    }
-                    edge_mgfs[edge] = lambda t, lam=lam: MGF_Functions.PoissonMGF(t, lam)
-                    edge_mgf_derivatives[edge] = lambda t, lam=lam: MGF_Functions.PoissonMGFDerivative(t, lam)
-                    edge_mgf_derivatives_2[edge] = lambda t, lam=lam: MGF_Functions.PoissonMGFDerivative2(t, lam)
-                    
-                if dist == 'C':
-                    sigma2 = float(curr[3])
-                    parameters[edge] = {
-                        'sigma2': float(curr[3])
-                    }
-                    edge_mgfs[edge] = lambda t, sigma2=sigma2: 1 if np.isclose(t, 0) else MGF_Functions.AbsoluteCauchyMGF(t,sigma2)
-                    edge_mgf_derivatives[edge] = lambda t, sigma2=sigma2: 1 if np.isclose(t, 0) else MGF_Functions.AbsoluteCauchyMGFDerivative(t,sigma2)
-                    edge_mgf_derivatives_2[edge] = lambda t, sigma2=sigma2: 1 if np.isclose(t, 0) else MGF_Functions.AbsoluteCauchyMGFDerivative2(t,sigma2)
-
-            self.edges = edges
-            self.nodes = list(nodes)
-            self.distributions = distributions
-            self.parameters = parameters
-            self.edge_delays = edge_delays
-            self.edge_mgfs = edge_mgfs
-            self.edge_mgf_derivatives = edge_mgf_derivatives
-            self.edge_mgf_derivatives_2 = edge_mgf_derivatives_2
+            self.nodes = list(self.nodes)
         
     def build_connection_tree(self) -> None:
         """
@@ -152,36 +101,6 @@ class Tree:
                         A_layer[j,k]=1  
             A_matrix[node] = A_layer 
         self.A = A_matrix
-    
-    def simulate_edge(
-        self,
-        edge: TreeEdge
-    ) -> Union[float,int]:
-        """
-        Simulates the edge delay for a specific edge using its distribution and parameters.
-
-        Args:
-            edge (TreeEdge): The edge to simulate.
-
-        Returns:
-            Union[float,int]: Simulated delay for the edge, depending on the distribution.
-        """
-        distribution = self.distributions[edge]
-        parameters = self.parameters[edge]
-        if distribution == 'N':
-            return np.random.normal(parameters['mu'],parameters['sigma2'])
-        
-        if distribution == 'E':
-            return np.random.exponential(parameters['lambda'])
-        
-        if distribution == 'U':
-            return np.random.uniform(parameters['start'],parameters['stop'])
-        
-        if distribution == 'P':
-            return np.random.poisson(parameters['lambda'])
-        
-        if distribution == 'C':
-            return np.abs(sp.stats.cauchy.rvs(loc=0,scale = parameters['sigma2']))
 
     def simulate(self) -> None:
         """
@@ -189,7 +108,7 @@ class Tree:
         variable `self.edge_delays` with these simulated values.
         """
         for edge in self.edges:
-            self.edge_delays[edge]=self.simulate_edge(edge)
+            self.edge_distributions[edge].sample()
     
     #Simulates the infection from a given source node to an observer node
     def Infection_Simulation(
@@ -210,8 +129,7 @@ class Tree:
             edges = self.search.get_path(source, observer)
             time = 0
             for edge in edges:
-                time += self.edge_delays[edge]
-                #print(time)
+                time += self.edge_distributions[edge].delay
             infection_times[observer] = time
         self.infection_times= infection_times
 
@@ -235,7 +153,7 @@ class Tree:
         for i,edge in enumerate(self.edges):
             tempval = np.matmul(u,self.A[source][:,i])
             if tempval != 0:
-                mgf *= self.edge_mgfs[edge](tempval)
+                mgf *= self.edge_distributions[edge].mgf(tempval)
         return mgf
     
     def cond_joint_mgf(
@@ -268,7 +186,7 @@ class Tree:
             if edge not in path:
                 tempval = np.matmul(u,self.A[source][:,i])
                 if tempval != 0:
-                    mgf *= self.edge_mgfs[edge](tempval)
+                    mgf *= self.edge_distributions[edge].mgf(tempval)
         
         if method == 1 and len(path) != 0:
             tempval = 0
@@ -281,12 +199,14 @@ class Tree:
             b1 = 0
             b2=0
             for i,edge in enumerate(self.edges):
-                b2+= self.edge_mgf_derivatives_2[edge](0)-self.edge_mgf_derivatives[edge](0)**2
+                if self.edge_distributions[edge].impl.type == "C":
+                    raise ValueError(f"Cannot use method 2 with the AbsoluteCauchy distribution")
+                b2+= self.edge_distributions[edge].mgf_derivative2(0)-self.edge_distributions[edge].mgf_derivative(0)**2
                 b1+= np.matmul(u,self.A[source][:,i])*b2
             b = b1/b2
             a1 = 0
             for i,edge in enumerate(self.edges):
-                a1+=(b-np.matmul(u,self.A[source][:,i]))*self.edge_mgf_derivatives[edge](0)
+                a1+=(b-np.matmul(u,self.A[source][:,i]))*self.edge_distributions[edge].mgf_derivative(0)
             a = np.exp(a1)
             mgf *= a*np.exp(-1*b*self.infection_times[obs_o])
 
@@ -295,10 +215,10 @@ class Tree:
             lam = -1
             prod = 1
             for i, edge in enumerate(path):
-                if self.distributions[edge] != 'E':
-                    raise ValueError(f"Non exponential distribution: {self.distributions[edge]}. Distribution must be exponential")
+                if self.edge_distributions[edge].impl.type != "E":
+                    raise ValueError(f"Non exponential distribution: {self.edge_distributions[edge].impl.type}. Distribution must be exponential")
                 if i == 0:
-                    lam = self.parameters[edge]['lambda']
+                    lam = self.edge_distributions[edge].params['lambda']
                 prod *= 1/(lam + np.matmul(u,self.A[source][:,i]))
                 Theta[i,i] = -1*(lam + np.matmul(u,self.A[source][:,i]))
                 if i != len(path)-1:
@@ -346,7 +266,7 @@ class Tree:
                 include_edge.append(edge)
         with open(outfile, 'w', encoding='utf-8') as file:
             for edge in include_edge:
-                file.write(f"{list(edge)[0]},{list(edge)[1]},{self.distributions[edge]},{','.join(map(str,self.parameters[edge].values()))}\n")
+                file.write(f"{list(edge)[0]},{list(edge)[1]},{self.edge_distributions[edge].impl.type},{','.join(map(str,self.edge_distributions[edge].params.values()))}\n")
         return list(nodes.intersection(set(self.observers)))
 
 

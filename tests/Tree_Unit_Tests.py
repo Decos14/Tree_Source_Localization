@@ -3,19 +3,17 @@ import numpy as np
 import tempfile
 import os
 import copy
-from tree_source_localization.Tree import Tree # type: ignore
-
-
+from tree_source_localization.Tree import Tree  # type: ignore
 
 class TestTree(unittest.TestCase):
 
     def setUp(self):
-        self.temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w+', suffix = 'csv')
-        self.temp_file.write("""A,B,N,1.0,0.5
-B,C,E,2.0
-C,D,U,1.0,3.0
-D,E,P,3.0
-E,F,C,1.0
+        self.temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w+', suffix='csv')
+        self.temp_file.write("""A,B,N,mu=1.0;sigma2=0.5
+B,C,E,lambda=2.0
+C,D,U,start=1.0;stop=3.0
+D,E,P,lambda=3.0
+E,F,N,mu=1.0;sigma2=0.1
 """)
         self.temp_file.close()
 
@@ -29,11 +27,8 @@ E,F,C,1.0
     def test_tree_structure_and_parameters(self):
         self.assertEqual(set(self.tree.nodes), {"A", "B", "C", "D", "E", "F"})
         self.assertEqual(len(self.tree.edges), 5)
-        self.assertIn("N", set(self.tree.distributions.values()))
-        self.assertIn("E", set(self.tree.distributions.values()))
-        self.assertIn("U", set(self.tree.distributions.values()))
-        self.assertIn("P", set(self.tree.distributions.values()))
-        self.assertIn("C", set(self.tree.distributions.values()))
+        self.assertEqual(set(self.tree.edge_distributions[edge].dist_type for edge in self.tree.edges),
+                         {"N", "E", "U", "P"})
 
     def test_connection_tree_validity(self):
         for node, neighbors in self.tree.connection_tree.items():
@@ -46,20 +41,12 @@ E,F,C,1.0
         for node in A:
             self.assertEqual(A[node].shape, (len(self.observers), len(self.tree.edges)))
 
-    def test_edge_simulation_per_distribution(self):
-        dist_to_sampler = {
-            'N': lambda: Tree._simulate_edge(self.tree, frozenset({"X", "Y"})),
-            'E': lambda: Tree._simulate_edge(self.tree, frozenset({"X", "Y"})),
-            'U': lambda: Tree._simulate_edge(self.tree, frozenset({"X", "Y"})),
-            'P': lambda: Tree._simulate_edge(self.tree, frozenset({"X", "Y"})),
-            'C': lambda: Tree._simulate_edge(self.tree, frozenset({"X", "Y"})),
-        }
-        # Just check all actual edges simulate positive numbers
+    def test_edge_simulation_values(self):
         self.tree.simulate()
         for edge in self.tree.edges:
-            d = self.tree.edge_delays[edge]
-            self.assertIsInstance(d, (int, float))
-            self.assertGreaterEqual(d, 0)
+            val = self.tree.edge_distributions[edge].delay
+            self.assertIsInstance(val, (float, int))
+            self.assertGreaterEqual(val, 0)
 
     def test_infection_simulation_sets_times(self):
         self.tree.simulate()
@@ -85,7 +72,7 @@ E,F,C,1.0
             self.assertIsInstance(val, float)
 
     def test_equivalent_class_output_validity(self):
-        outfile = "test_equiv_class_tree.csv"   
+        outfile = "test_equiv_class_tree.csv"
         new_obs = self.tree.Equivalent_Class(self.observers[0], outfile)
         self.assertTrue(set(new_obs).issubset(set(self.observers)))
         self.assertTrue(os.path.exists(outfile))
@@ -111,6 +98,7 @@ E,F,C,1.0
             for edge in edges:
                 self.assertIsInstance(edge, frozenset)
                 self.assertIn(edge, self.tree.edges)
+
 
 if __name__ == '__main__':
     unittest.main()
