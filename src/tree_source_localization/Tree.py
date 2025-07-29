@@ -162,10 +162,10 @@ class Tree:
         mgf *= augment(u, self.A[source], self.infection_times[obs_o], path, self.edges)
         return mgf
     
-    def _get_subtree_nodes(
+    def _get_edges_in_subtree(
         self,
         root: str
-        ) -> Set[str]:
+        ) -> List[TreeEdge]:
         """
         Performs a BFS traversal from the given root node to find all nodes in the
         connected subtree that are not separated by observer boundaries.
@@ -174,7 +174,7 @@ class Tree:
             root (str): The starting node (typically the first observer infected).
 
         Returns:
-            Set[str]: Set of nodes in the relevant subtree.
+            List[TreeEdge]: List of edges (as frozensets) internal to the subtree.
         """
         to_check = self.connection_tree[root][:]
         visited = {root}
@@ -185,23 +185,7 @@ class Tree:
                 visited.add(current)
                 if current not in self.observers:
                     to_check.extend(self.connection_tree[current])
-        return visited
-
-
-    def _get_edges_within(
-        self,
-        nodes: Set[str]
-    ) -> List[TreeEdge]:
-        """
-        Returns a list of all edges where both nodes are within a given node set.
-
-        Args:
-            nodes (Set[str]): Set of node names.
-
-        Returns:
-            List[TreeEdge]: List of edges (as frozensets) internal to the subtree.
-        """
-        return [edge for edge in self.edges if edge.issubset(nodes)]
+        return [edge for edge in self.edges if edge.issubset(visited)]
 
 
     def _write_edges_to_json(
@@ -235,7 +219,7 @@ class Tree:
         self,
         first_obs: str,
         outfile: str
-    ) -> List[str]:
+    ) -> None:
         """
         Computes the equivalence class of nodes reachable from the first infected observer,
         filters all edges within that subtree, and writes them to a JSON file.
@@ -243,14 +227,10 @@ class Tree:
         Args:
             first_obs (str): The first observer infected.
             outfile (str): File path where the resulting subtree edges will be written.
-
-        Returns:
-            List[str]: List of observer nodes within the equivalence class.
         """
-        nodes = self._get_subtree_nodes(first_obs)
-        edges = self._get_edges_within(nodes)
+        edges = self._get_edges_in_subtree(first_obs)
         self._write_edges_to_json(edges, outfile)
-        return list(nodes & set(self.observers))
+        return None
 
     def save(
         self,

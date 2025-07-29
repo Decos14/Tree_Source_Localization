@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.1] - 2025-07-29
+- combined _get_edges_within and _get_subtree_nodes
+- get_equivalent_class returns None now
+
 ## [0.7.0] - 2025-07-29
 
 ### Changed

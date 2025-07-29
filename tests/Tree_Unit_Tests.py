@@ -104,8 +104,7 @@ class TestTree(unittest.TestCase):
 
     def test_equivalent_class_output_validity(self):
         outfile = "test_equiv_class_tree.csv"
-        new_obs = self.tree.get_equivalent_class(self.observers[0], outfile)
-        self.assertTrue(set(new_obs).issubset(set(self.observers)))
+        self.tree.get_equivalent_class(self.observers[0], outfile)
         self.assertTrue(os.path.exists(outfile))
         os.remove(outfile)
 
