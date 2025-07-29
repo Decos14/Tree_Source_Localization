@@ -83,7 +83,6 @@ class Tree:
         for edge in self.edges:
             self.edges[edge].sample()
     
-    #Simulates the infection from a given source node to an observer node
     def simulate_infection(
         self,
         source: str
@@ -97,7 +96,6 @@ class Tree:
         """
         infection_times = {}
 
-        #Finds the path each observer to the source using self.search and then adds up the edge costs stored in the tree on those paths
         for observer in self.observers:
             edges = self.search.get_path(source, observer)
             time = 0
@@ -267,7 +265,7 @@ class Tree:
         val0 = self.joint_mgf(u, source)
         t = list(self.infection_times.values())
         val1 = np.exp(-1*np.dot(u,t))
-        if augment != None:
+        if augment is not None:
             val1 = val1*((len(self.observers)-1)/(2*len(self.observers)-1))
             conditional_expectation = 0
             for o in self.observers:
@@ -279,7 +277,7 @@ class Tree:
 
     def localize(
         self,
-        method = None
+        method: int = None
     ) -> str:
         """
         Estimates the most likely infection source node by minimizing the objective function.
