@@ -177,7 +177,7 @@ class TestTreeRegression(unittest.TestCase):
         np.random.seed(42)
         u = np.random.rand(len(self.observers))
 
-        val = self.tree_new.cond_joint_mgf(u, "A", self.observers[0], 1)
+        val = self.tree_new.cond_joint_mgf(u, "A", self.observers[0], 'linear')
         saved_val = self.saved_results.get(f"Cond_Joint_MGF_1")
         if isinstance(val, np.ndarray):
             val = float(val)
@@ -193,7 +193,7 @@ class TestTreeRegression(unittest.TestCase):
 
         np.random.seed(42)
         u = np.random.rand(len(self.observers))
-        val = self.tree_new.cond_joint_mgf(u, "A", self.observers[0], 2)
+        val = self.tree_new.cond_joint_mgf(u, "A", self.observers[0], 'exponential')
         saved_val = self.saved_results.get(f"Cond_Joint_MGF_2")
         if isinstance(val, np.ndarray):
             val = float(val)
@@ -231,7 +231,7 @@ class TestTreeRegression(unittest.TestCase):
         np.random.seed(42)
         u = np.random.rand(len(obs))
 
-        val = tree_new.cond_joint_mgf(u, "A", "C", 3)
+        val = tree_new.cond_joint_mgf(u, "A", "C", 'exact')
         saved_val = self.saved_results.get("Cond_Joint_MGF_3")
 
         os.unlink(temp_file_exp.name)
@@ -264,7 +264,7 @@ class TestTreeRegression(unittest.TestCase):
         u = np.random.rand(len(self.observers))
 
         saved_val = self.saved_results.get("Objective_Function")
-        val = self.tree_new.obj_func(u, "A", augment=1)
+        val = self.tree_new.obj_func(u, "A", method='linear')
         self.assertAlmostEqual(val, saved_val, places=5)
 
     def test_obj_func_2_match(self):
@@ -277,7 +277,7 @@ class TestTreeRegression(unittest.TestCase):
         u = np.random.rand(len(self.observers))
 
         saved_val = self.saved_results.get("Objective_Function")
-        val = self.tree_new.obj_func(u, "A", augment=2)
+        val = self.tree_new.obj_func(u, "A", method='exponential')
         self.assertAlmostEqual(val, saved_val, places=5)
 
     def test_localize_output_match(self):

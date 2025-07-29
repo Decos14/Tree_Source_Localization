@@ -115,14 +115,14 @@ print(value)
 
 ---
 
-#### `cond_joint_mgf(u: ArrayLike, source: str, obs_o: str, method: int) -> float`
+#### `cond_joint_mgf(u: ArrayLike, source: str, obs_o: str, method: str) -> float`
 
 Computes or approximates the conditional joint MGF of observers given the first infected observer `obs_o` using a specified augmentation method.
 
 - `method` options:  
-  1 = Linear approximation  
-  2 = Exponential approximation  
-  3 = Exact solution (iid exponential delays)
+  'linear' = Linear approximation  
+  'exponential' = Exponential approximation  
+  'exact' = Exact solution (iid exponential delays)
 
 ```
 value = tree.cond_joint_mgf(u, "nodeA", "observer1", method=1)
@@ -142,23 +142,23 @@ print(relevant_observers)
 
 ---
 
-#### `obj_func(u: ArrayLike, source: str, augment: int = None) -> float`
+#### `obj_func(u: ArrayLike, source: str, method: str = None) -> float`
 
 Objective function used to identify the most likely infection source. Accepts optional augmentation.
 
 ```
-val = tree.obj_func(u, "nodeA", augment=2)
+val = tree.obj_func(u, "nodeA", augment='exponential')
 print(val)
 ```
 
 ---
 
-#### `localize(method: int = None) -> str`
+#### `localize(method: str = None) -> str`
 
 Estimates the most likely infection source node by minimizing the objective function, optionally using augmentation.
 
 ```
-predicted_source = tree.localize(method=2)
+predicted_source = tree.localize(method='linear')
 print(f"Predicted source: {predicted_source}")
 ```
 

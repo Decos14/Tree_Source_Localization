@@ -98,7 +98,7 @@ class TestTree(unittest.TestCase):
         self.tree.simulate()
         self.tree.simulate_infection("A")
         u = np.random.rand(len(self.observers))
-        for method in [1, 2]:
+        for method in ['linear', 'exponential']:
             val = self.tree.cond_joint_mgf(u, "A", self.observers[0], method)
             self.assertIsInstance(val, float)
 
@@ -113,8 +113,8 @@ class TestTree(unittest.TestCase):
         self.tree.simulate()
         self.tree.simulate_infection("A")
         u = np.random.rand(len(self.observers))
-        for method in [None, 1, 2]:
-            val = self.tree.obj_func(u, "A", augment=method)
+        for method in [None, 'linear', 'exponential']:
+            val = self.tree.obj_func(u, "A", method=method)
             self.assertIsInstance(val, float)
 
     def test_localize_returns_node(self):

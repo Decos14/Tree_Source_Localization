@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import numpy as np
-from tree_source_localization import MGF_Functions
+from tree_source_localization import MGFFunctions
 import scipy as sp
 
 class BaseDistribution(ABC):
@@ -44,13 +44,13 @@ class PositiveNormalDistribution(BaseDistribution):
         return np.random.normal(self.mu, self.sigma2)
 
     def mgf(self, t: float) -> float:
-        return 1 if np.isclose(t, 0) else MGF_Functions.PositiveNormalMGF(t, self.mu, self.sigma2)
+        return 1 if np.isclose(t, 0) else MGFFunctions.PositiveNormalMGF(t, self.mu, self.sigma2)
 
     def mgf_derivative(self, t: float) -> float:
-        return MGF_Functions.PositiveNormalMGFDerivative(t, self.mu, self.sigma2)
+        return MGFFunctions.PositiveNormalMGFDerivative(t, self.mu, self.sigma2)
 
     def mgf_derivative2(self, t: float) -> float:
-        return MGF_Functions.PositiveNormalMGFDerivative2(t, self.mu, self.sigma2)
+        return MGFFunctions.PositiveNormalMGFDerivative2(t, self.mu, self.sigma2)
 
 @DistributionRegistry.register("E")
 class ExponentialDistribution(BaseDistribution):
@@ -63,13 +63,13 @@ class ExponentialDistribution(BaseDistribution):
         return np.random.exponential(self.lam)
 
     def mgf(self, t: float) -> float:
-        return 1 if np.isclose(t, 0) else MGF_Functions.ExponentialMGF(t, self.lam)
+        return 1 if np.isclose(t, 0) else MGFFunctions.ExponentialMGF(t, self.lam)
 
     def mgf_derivative(self, t: float) -> float:
-        return MGF_Functions.ExponentialMGFDerivative(t, self.lam)
+        return MGFFunctions.ExponentialMGFDerivative(t, self.lam)
 
     def mgf_derivative2(self, t: float) -> float:
-        return MGF_Functions.ExponentialMGFDerivative2(t, self.lam)
+        return MGFFunctions.ExponentialMGFDerivative2(t, self.lam)
 
 @DistributionRegistry.register("U")
 class UniformDistribution(BaseDistribution):
@@ -83,13 +83,13 @@ class UniformDistribution(BaseDistribution):
         return np.random.uniform(self.start, self.stop)
 
     def mgf(self, t: float) -> float:
-        return MGF_Functions.UniformMGF(t, self.start, self.stop)
+        return MGFFunctions.UniformMGF(t, self.start, self.stop)
 
     def mgf_derivative(self, t: float) -> float:
-        return MGF_Functions.UniformMGFDerivative(t, self.start, self.stop)
+        return MGFFunctions.UniformMGFDerivative(t, self.start, self.stop)
 
     def mgf_derivative2(self, t: float) -> float:
-        return MGF_Functions.UniformMGFDerivative2(t, self.start, self.stop)
+        return MGFFunctions.UniformMGFDerivative2(t, self.start, self.stop)
 
 @DistributionRegistry.register("P")
 class PoissonDistribution(BaseDistribution):
@@ -102,13 +102,13 @@ class PoissonDistribution(BaseDistribution):
         return np.random.poisson(self.lam)
 
     def mgf(self, t: float) -> float:
-        return MGF_Functions.PoissonMGF(t, self.lam)
+        return MGFFunctions.PoissonMGF(t, self.lam)
 
     def mgf_derivative(self, t: float) -> float:
-        return MGF_Functions.PoissonMGFDerivative(t, self.lam)
+        return MGFFunctions.PoissonMGFDerivative(t, self.lam)
 
     def mgf_derivative2(self, t: float) -> float:
-        return MGF_Functions.PoissonMGFDerivative2(t, self.lam)
+        return MGFFunctions.PoissonMGFDerivative2(t, self.lam)
 
 @DistributionRegistry.register("C")
 class AbsoluteCauchyDistribution(BaseDistribution):
@@ -121,13 +121,13 @@ class AbsoluteCauchyDistribution(BaseDistribution):
         return np.abs(sp.stats.cauchy.rvs(loc=0,scale = self.sigma2))
 
     def mgf(self, t: float) -> float:
-        return 1 if np.isclose(t, 0) else MGF_Functions.AbsoluteCauchyMGF(t, self.sigma2)
+        return 1 if np.isclose(t, 0) else MGFFunctions.AbsoluteCauchyMGF(t, self.sigma2)
 
     def mgf_derivative(self, t: float) -> float:
-        return MGF_Functions.AbsoluteCauchyMGFDerivative(t, self.sigma2)
+        return MGFFunctions.AbsoluteCauchyMGFDerivative(t, self.sigma2)
 
     def mgf_derivative2(self, t: float) -> float:
-        return MGF_Functions.AbsoluteCauchyMGFDerivative2(t, self.sigma2)
+        return MGFFunctions.AbsoluteCauchyMGFDerivative2(t, self.sigma2)
 
 class EdgeDistribution:
     def __init__(self, dist_type: str, params: dict):

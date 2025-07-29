@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0] - 2025-07-29
+- built a joint mgf augmentation registry
+- cleaned up code in cond_joint_mgf using it
+
 ## [0.5.3] - 2025-07-29
 
 ### Changed

@@ -1,11 +1,10 @@
 import numpy as np
 import scipy as sp
 import json
-import math
 from typing import Dict, List, Tuple, Callable, Union, FrozenSet
 from numpy.typing import ArrayLike
 from .Search import _DepthFirstSearch
-import ast
+from .MGFAugment import get_augmentation
 from .EdgeDistribution import EdgeDistribution
 
 
@@ -159,47 +158,8 @@ class Tree:
                 if relevant_u  != 0:
                     mgf *= self.edges[edge].mgf(relevant_u )
         
-        if method == 1 and len(path) != 0:
-            approx_value = 0
-            for i,edge in enumerate(self.edges.keys()):
-                approx_value += np.matmul(u,self.A[source][:,i])
-            approx_value *= -self.infection_times[obs_o]/(len(path))
-            mgf *= np.exp(approx_value)
-
-        if method == 2 and len(path) != 0:
-            b1 = 0
-            b2=0
-            for i,edge in enumerate(self.edges.keys()):
-                if self.edges[edge].impl.type == "C":
-                    raise ValueError(f"Cannot use method 2 with the AbsoluteCauchy distribution")
-                b2+= self.edges[edge].mgf_derivative2(0)-self.edges[edge].mgf_derivative(0)**2
-                b1+= np.matmul(u,self.A[source][:,i])*b2
-            b = b1/b2
-            a1 = 0
-            for i,edge in enumerate(self.edges.keys()):
-                a1+=(b-np.matmul(u,self.A[source][:,i]))*self.edges[edge].mgf_derivative(0)
-            a = np.exp(a1)
-            mgf *= a*np.exp(-1*b*self.infection_times[obs_o])
-
-        if method == 3 and len(path) != 0:
-            Theta = np.zeros((len(path),len(path)))
-            lam = -1
-            prod = 1
-            for i, edge in enumerate(path):
-                if self.edges[edge].impl.type != "E":
-                    raise ValueError(f"Non exponential distribution: {self.edges[edge].impl.type}. Distribution must be exponential")
-                if i == 0:
-                    lam = self.edges[edge].params['lambda']
-                prod *= 1/(lam + np.matmul(u,self.A[source][:,i]))
-                Theta[i,i] = -1*(lam + np.matmul(u,self.A[source][:,i]))
-                if i != len(path)-1:
-                    Theta[i,i+1] = lam + np.matmul(u,self.A[source][:,i])
-            alpha = np.zeros((1,len(path)))
-            alpha[0,0]=1
-            t = self.infection_times[obs_o]
-            exp_Theta = sp.linalg.expm(t*Theta)
-            g_t = -1*np.matmul(np.matmul(np.matmul(alpha, exp_Theta),Theta),np.ones((1,len(path),1)))
-            mgf *= g_t*(t**(len(path)-1))*np.exp(-1*lam*t)*(math.factorial(len(path)-1))*prod
+        augment = get_augmentation(method)
+        mgf *= augment(u, self.A[source], self.infection_times[obs_o], path, self.edges)
         return mgf
     
     def get_equivalent_class(
@@ -245,7 +205,7 @@ class Tree:
         self,
         u: ArrayLike,
         source: str,
-        augment: int = None
+        method: str = None
     ) -> float:
         """
         Objective function used to identify the most likely infection source.
@@ -253,11 +213,11 @@ class Tree:
         Args:
             u (ArrayLike): Vector to evaluate the objective function at.
             source (str): Candidate infection source node.
-            augment (int, optional): Augmentation method to apply (default is None):
+            method (Optional[str]): Augmentation method to apply (default is None):
                 None: No augmentation,
-                1: Linear approximation,
-                2: Exponential approximation,
-                3: Exact solution for iid exponential delays.
+                'linear': Linear approximation,
+                'exponential': Exponential approximation,
+                'exact': Exact solution for iid exponential delays.
 
         Returns:
             float: Value of the objective function at `u`.
@@ -265,11 +225,11 @@ class Tree:
         val0 = self.joint_mgf(u, source)
         t = list(self.infection_times.values())
         val1 = np.exp(-1*np.dot(u,t))
-        if augment is not None:
+        if method is not None:
             val1 = val1*((len(self.observers)-1)/(2*len(self.observers)-1))
             conditional_expectation = 0
             for o in self.observers:
-                conditional_expectation += self.cond_joint_mgf(u,source,o,method = augment)
+                conditional_expectation += self.cond_joint_mgf(u,source,o,method = method)
             conditional_expectation = conditional_expectation*(1/(2*len(self.observers)-1))
             val1 += conditional_expectation
         val = -1*(val1-val0)**2
@@ -277,21 +237,21 @@ class Tree:
 
     def localize(
         self,
-        method: int = None
+        method: str = None
     ) -> str:
         """
         Estimates the most likely infection source node by minimizing the objective function.
 
         Args:
-            method (int, optional): Augmentation method to use (default is None):
+            method (Optional[str]): Augmentation method to use (default is None):
                 None: No augmentation,
-                1: Linear approximation,
-                2: Exponential approximation,
-                3: Exact solution for iid exponential delays.
+                'linear': Linear approximation,
+                'exponential': Exponential approximation,
+                'exact': Exact solution for iid exponential delays.
 
         Returns:
             str: Name of the predicted source node.
-"""
+        """
         observer_idx = np.zeros(len(self.nodes))
         for i, node in enumerate(self.nodes):
             observer_idx[i] = sp.optimize.minimize(self.obj_func, np.random.rand(len(self.observers)), args = (node,method),bounds = [(0,None) for i in range(len(self.observers))],method='Nelder-Mead').fun
