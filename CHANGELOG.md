@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 ## [0.3.1] - 2025-07-29
 
 ### Changed
+- Rewrote build_connection_tree to be cleaner
+
+## [0.3.0] - 2025-07-29
+
+### Changed
 - Input file format is now a JSON instead of a CSV
 
 ## [0.2.1] - 2025-07-27

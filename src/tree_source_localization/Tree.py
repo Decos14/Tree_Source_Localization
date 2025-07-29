@@ -46,26 +46,17 @@ class Tree:
         }
 
         self.nodes = list(set().union(*list(self.edges.keys())))
-        
+    
     def build_connection_tree(self) -> None:
         """
         Builds an adjacency dictionary representing the tree topology and assigns it
         to the instance variable `self.connection_tree`.
         """
-        connection_tree = {}
+        connection_tree = {node: [] for node in self.nodes}
         for edge in self.edges:
-            nodes = []
-            for node in edge:
-                nodes.append(node)
-            
-            if nodes[0] not in connection_tree:
-                connection_tree[nodes[0]] = [nodes[1]]
-            if nodes[1] not in connection_tree:
-                connection_tree[nodes[1]] = [nodes[0]]
-            if nodes[0] in connection_tree and nodes[1] not in connection_tree[nodes[0]]:
-                connection_tree[nodes[0]].append(nodes[1])
-            if nodes[1] in connection_tree and nodes[0] not in connection_tree[nodes[1]]:
-                connection_tree[nodes[1]].append(nodes[0])
+            u, v = tuple(edge)
+            connection_tree[u].append(v)
+            connection_tree[v].append(u)
         self.connection_tree = connection_tree
     
     def build_A_matrix(self) -> None:
