@@ -67,7 +67,7 @@ class TestTree(unittest.TestCase):
                 self.assertIn(node, self.tree.connection_tree[neighbor])
 
     def test_build_A_matrix_dimensions(self):
-        A = self.tree.A
+        A = self.tree._A
         self.assertEqual(set(A.keys()), set(self.tree.nodes))
         for node in A:
             self.assertEqual(A[node].shape, (len(self.observers), len(self.tree.edges.keys())))
@@ -90,7 +90,7 @@ class TestTree(unittest.TestCase):
         self.tree.simulate()
         self.tree.simulate_infection("A")
         u = np.random.rand(len(self.observers))
-        val = self.tree.joint_mgf(u, "A")
+        val = self.tree._joint_mgf(u, "A")
         self.assertIsInstance(val, float)
         self.assertGreater(val, 0)
 
@@ -99,11 +99,11 @@ class TestTree(unittest.TestCase):
         self.tree.simulate_infection("A")
         u = np.random.rand(len(self.observers))
         for method in ['linear', 'exponential']:
-            val = self.tree.cond_joint_mgf(u, "A", self.observers[0], method)
+            val = self.tree._cond_joint_mgf(u, "A", self.observers[0], method)
             self.assertIsInstance(val, float)
 
     def test_equivalent_class_output_validity(self):
-        outfile = "test_equiv_class_tree.csv"
+        outfile = "test_equiv_class_tree.json"
         self.tree.get_equivalent_class(self.observers[0], outfile)
         self.assertTrue(os.path.exists(outfile))
         os.remove(outfile)
@@ -113,7 +113,7 @@ class TestTree(unittest.TestCase):
         self.tree.simulate_infection("A")
         u = np.random.rand(len(self.observers))
         for method in [None, 'linear', 'exponential']:
-            val = self.tree.objective_function(u, "A", method=method)
+            val = self.tree._objective_function(u, "A", method=method)
             self.assertIsInstance(val, float)
 
     def test_localize_returns_node(self):
@@ -124,7 +124,7 @@ class TestTree(unittest.TestCase):
 
     def test_path_and_search_output_validity(self):
         for obs in self.observers:
-            edges = self.tree.search.get_path("A", obs)
+            edges = self.tree._search.get_path("A", obs)
             for edge in edges:
                 self.assertIsInstance(edge, frozenset)
                 self.assertIn(edge, self.tree.edges.keys())

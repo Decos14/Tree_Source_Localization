@@ -2,7 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.0] - 2025-07-29
+
+### Changed
+- Updated all methods that should be non-public to begin with _
+- Updated all variables that should be non-public to begin with _
+
 ## [0.7.1] - 2025-07-29
+
+### Changed
 - combined _get_edges_within and _get_subtree_nodes
 - get_equivalent_class returns None now
 
