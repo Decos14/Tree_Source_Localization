@@ -2,7 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.2] - 2025-07-29
+
+### Changed
+- refactored the get_equivalent_class method
+- added a save method
+
 ## [0.6.1] - 2025-07-29
+
+### Changed
 - fixed sample of positive normal to return positive normal instead of normal
 
 ## [0.6.0] - 2025-07-29
