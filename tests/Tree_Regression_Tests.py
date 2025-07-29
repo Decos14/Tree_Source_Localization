@@ -55,10 +55,9 @@ E,F,N,mu=1.0;sigma2=0.1
             # Save data
             data = {
                 "nodes": cls.tree_new.nodes,
-                "edges": cls.tree_new.edges,
-                "distributions": {edge: cls.tree_new.edge_distributions[edge].dist_type for edge in cls.tree_new.edges},
-                "parameters": {edge: cls.tree_new.edge_distributions[edge].params for edge in cls.tree_new.edges},
-                "edge_delays": {edge: cls.tree_new.edge_distributions[edge].delay for edge in cls.tree_new.edges},
+                "distributions": {edge: cls.tree_new.edges[edge].dist_type for edge in cls.tree_new.edges},
+                "parameters": {edge: cls.tree_new.edges[edge].params for edge in cls.tree_new.edges},
+                "edge_delays": {edge: cls.tree_new.edges[edge].delay for edge in cls.tree_new.edges},
                 "connection_tree": cls.tree_new.connection_tree,
                 "A": cls.tree_new.A,
                 "Infection_times": cls.tree_new.infection_times,
@@ -78,19 +77,16 @@ E,F,N,mu=1.0;sigma2=0.1
     def tearDownClass(cls):
         os.unlink(cls.temp_file.name)
 
-    def test_edges_match(self):
-        self.assertEqual(self.tree_new.edges, self.saved_results.get('edges'))
-
     def test_nodes_match(self):
         self.assertEqual(set(self.tree_new.nodes), set(self.saved_results.get('nodes')))
 
     def test_distributions_match(self):
         # Now distributions are EdgeDistribution instances keyed by edge
-        dist_dict = {edge: self.tree_new.edge_distributions[edge].dist_type for edge in self.tree_new.edges}
+        dist_dict = {edge: self.tree_new.edges[edge].dist_type for edge in self.tree_new.edges}
         self.assertEqual(dist_dict, self.saved_results.get('distributions'))
 
     def test_parameters_match(self):
-        param_dict = {edge: self.tree_new.edge_distributions[edge].params for edge in self.tree_new.edges}
+        param_dict = {edge: self.tree_new.edges[edge].params for edge in self.tree_new.edges}
         self.assertEqual(param_dict, self.saved_results.get('parameters'))
 
     def test_edge_delays_match(self):
@@ -98,7 +94,7 @@ E,F,N,mu=1.0;sigma2=0.1
         self.tree_new.simulate()
         saved = self.saved_results.get('edge_delays')
         for edge in saved:
-            self.assertAlmostEqual(self.tree_new.edge_distributions[edge].delay, saved[edge], places=5)
+            self.assertAlmostEqual(self.tree_new.edges[edge].delay, saved[edge], places=5)
 
     def test_connection_tree_match(self):
         saved_conn = self.saved_results.get('connection_tree')

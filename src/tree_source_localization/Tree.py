@@ -39,10 +39,9 @@ class Tree:
         """
         with open(file_name, newline='', encoding='utf-8') as filestream:
             reader = csv.reader(filestream)
-
-            self.edges = []
+            
             self.nodes = set()
-            self.edge_distributions = {}
+            self.edges = {}
 
             for row in reader:
                 if not row or row[0].startswith('#'):
@@ -59,9 +58,8 @@ class Tree:
                 }
 
                 edge = frozenset({node1, node2})
-                self.edges.append(edge)
                 self.nodes.update(edge)
-                self.edge_distributions[edge] = EdgeDistribution(dist_type, param_dict)
+                self.edges[edge] = EdgeDistribution(dist_type, param_dict)
 
             self.nodes = list(self.nodes)
         
@@ -93,9 +91,9 @@ class Tree:
         """
         A_matrix = {}
         for _, node in enumerate(self.nodes):
-            A_layer= np.zeros((len(self.observers),len(self.edges)))
+            A_layer= np.zeros((len(self.observers),len(self.edges.keys())))
             for j, obs in enumerate(self.observers):
-                for k, edge in enumerate(self.edges):
+                for k, edge in enumerate(self.edges.keys()):
                     path = self.search.get_path(node,obs)
                     if edge in path:
                         A_layer[j,k]=1  
@@ -108,7 +106,7 @@ class Tree:
         variable `self.edge_delays` with these simulated values.
         """
         for edge in self.edges:
-            self.edge_distributions[edge].sample()
+            self.edges[edge].sample()
     
     #Simulates the infection from a given source node to an observer node
     def Infection_Simulation(
@@ -129,7 +127,7 @@ class Tree:
             edges = self.search.get_path(source, observer)
             time = 0
             for edge in edges:
-                time += self.edge_distributions[edge].delay
+                time += self.edges[edge].delay
             infection_times[observer] = time
         self.infection_times= infection_times
 
@@ -150,10 +148,10 @@ class Tree:
             float: The value of the joint MGF at `u`.
         """
         mgf = 1
-        for i,edge in enumerate(self.edges):
+        for i,edge in enumerate(self.edges.keys()):
             tempval = np.matmul(u,self.A[source][:,i])
             if tempval != 0:
-                mgf *= self.edge_distributions[edge].mgf(tempval)
+                mgf *= self.edges[edge].mgf(tempval)
         return mgf
     
     def cond_joint_mgf(
@@ -182,15 +180,15 @@ class Tree:
         mgf = 1
 
         path  = self.search.get_path(source, obs_o)
-        for i,edge in enumerate(self.edges):
+        for i,edge in enumerate(self.edges.keys()):
             if edge not in path:
                 tempval = np.matmul(u,self.A[source][:,i])
                 if tempval != 0:
-                    mgf *= self.edge_distributions[edge].mgf(tempval)
+                    mgf *= self.edges[edge].mgf(tempval)
         
         if method == 1 and len(path) != 0:
             tempval = 0
-            for i,edge in enumerate(self.edges):
+            for i,edge in enumerate(self.edges.keys()):
                 tempval += np.matmul(u,self.A[source][:,i])
             tempval *= -self.infection_times[obs_o]/(len(path))
             mgf *= np.exp(tempval)
@@ -198,15 +196,15 @@ class Tree:
         if method == 2 and len(path) != 0:
             b1 = 0
             b2=0
-            for i,edge in enumerate(self.edges):
-                if self.edge_distributions[edge].impl.type == "C":
+            for i,edge in enumerate(self.edges.keys()):
+                if self.edges[edge].impl.type == "C":
                     raise ValueError(f"Cannot use method 2 with the AbsoluteCauchy distribution")
-                b2+= self.edge_distributions[edge].mgf_derivative2(0)-self.edge_distributions[edge].mgf_derivative(0)**2
+                b2+= self.edges[edge].mgf_derivative2(0)-self.edges[edge].mgf_derivative(0)**2
                 b1+= np.matmul(u,self.A[source][:,i])*b2
             b = b1/b2
             a1 = 0
-            for i,edge in enumerate(self.edges):
-                a1+=(b-np.matmul(u,self.A[source][:,i]))*self.edge_distributions[edge].mgf_derivative(0)
+            for i,edge in enumerate(self.edges.keys()):
+                a1+=(b-np.matmul(u,self.A[source][:,i]))*self.edges[edge].mgf_derivative(0)
             a = np.exp(a1)
             mgf *= a*np.exp(-1*b*self.infection_times[obs_o])
 
@@ -215,10 +213,10 @@ class Tree:
             lam = -1
             prod = 1
             for i, edge in enumerate(path):
-                if self.edge_distributions[edge].impl.type != "E":
-                    raise ValueError(f"Non exponential distribution: {self.edge_distributions[edge].impl.type}. Distribution must be exponential")
+                if self.edges[edge].impl.type != "E":
+                    raise ValueError(f"Non exponential distribution: {self.edges[edge].impl.type}. Distribution must be exponential")
                 if i == 0:
-                    lam = self.edge_distributions[edge].params['lambda']
+                    lam = self.edges[edge].params['lambda']
                 prod *= 1/(lam + np.matmul(u,self.A[source][:,i]))
                 Theta[i,i] = -1*(lam + np.matmul(u,self.A[source][:,i]))
                 if i != len(path)-1:
@@ -266,7 +264,7 @@ class Tree:
                 include_edge.append(edge)
         with open(outfile, 'w', encoding='utf-8') as file:
             for edge in include_edge:
-                file.write(f"{list(edge)[0]},{list(edge)[1]},{self.edge_distributions[edge].impl.type},{','.join(map(str,self.edge_distributions[edge].params.values()))}\n")
+                file.write(f"{list(edge)[0]},{list(edge)[1]},{self.edges[edge].impl.type},{','.join(map(str,self.edges[edge].params.values()))}\n")
         return list(nodes.intersection(set(self.observers)))
 
 

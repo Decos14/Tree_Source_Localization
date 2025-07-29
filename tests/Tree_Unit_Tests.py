@@ -26,8 +26,8 @@ E,F,N,mu=1.0;sigma2=0.1
 
     def test_tree_structure_and_parameters(self):
         self.assertEqual(set(self.tree.nodes), {"A", "B", "C", "D", "E", "F"})
-        self.assertEqual(len(self.tree.edges), 5)
-        self.assertEqual(set(self.tree.edge_distributions[edge].dist_type for edge in self.tree.edges),
+        self.assertEqual(len(self.tree.edges.keys()), 5)
+        self.assertEqual(set(self.tree.edges[edge].dist_type for edge in self.tree.edges.keys()),
                          {"N", "E", "U", "P"})
 
     def test_connection_tree_validity(self):
@@ -39,12 +39,12 @@ E,F,N,mu=1.0;sigma2=0.1
         A = self.tree.A
         self.assertEqual(set(A.keys()), set(self.tree.nodes))
         for node in A:
-            self.assertEqual(A[node].shape, (len(self.observers), len(self.tree.edges)))
+            self.assertEqual(A[node].shape, (len(self.observers), len(self.tree.edges.keys())))
 
     def test_edge_simulation_values(self):
         self.tree.simulate()
         for edge in self.tree.edges:
-            val = self.tree.edge_distributions[edge].delay
+            val = self.tree.edges[edge].delay
             self.assertIsInstance(val, (float, int))
             self.assertGreaterEqual(val, 0)
 
@@ -97,7 +97,7 @@ E,F,N,mu=1.0;sigma2=0.1
             edges = self.tree.search.get_path("A", obs)
             for edge in edges:
                 self.assertIsInstance(edge, frozenset)
-                self.assertIn(edge, self.tree.edges)
+                self.assertIn(edge, self.tree.edges.keys())
 
 
 if __name__ == '__main__':
