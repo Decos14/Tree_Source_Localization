@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0] - 2025-07-29
+
+### Changed
+- Renamed Infection_Simulation to simulate_infection
+- Renamed Equivalent_Class to get_equivalent_class
+
 ## [0.4.0] - 2025-07-29
 
 ### Changed

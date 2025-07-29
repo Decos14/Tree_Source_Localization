@@ -62,7 +62,7 @@ class TestTreeRegression(unittest.TestCase):
             np.random.seed(42)
             cls.tree_new.simulate()
             np.random.seed(42)
-            cls.tree_new.Infection_Simulation("A")
+            cls.tree_new.simulate_infection("A")
             cls.tree_new.build_A_matrix()
             np.random.seed(42)
             u = np.random.rand(len(cls.observers))
@@ -76,7 +76,7 @@ class TestTreeRegression(unittest.TestCase):
             np.random.seed(42)
             tree_new_3.simulate()
             np.random.seed(42)
-            tree_new_3.Infection_Simulation("A")
+            tree_new_3.simulate_infection("A")
 
             np.random.seed(42)
             u_3 = np.random.rand((len(obs)))
@@ -146,7 +146,7 @@ class TestTreeRegression(unittest.TestCase):
         np.random.seed(42)
         self.tree_new.simulate()
         np.random.seed(42)
-        self.tree_new.Infection_Simulation("A")
+        self.tree_new.simulate_infection("A")
         saved_inf = self.saved_results.get("Infection_times")
         self.assertEqual(set(self.tree_new.infection_times.keys()), set(saved_inf.keys()))
         for k in saved_inf:
@@ -156,7 +156,7 @@ class TestTreeRegression(unittest.TestCase):
         np.random.seed(42)
         self.tree_new.simulate()
         np.random.seed(42)
-        self.tree_new.Infection_Simulation("A")
+        self.tree_new.simulate_infection("A")
 
         np.random.seed(42)
         u = np.random.rand(len(self.observers))
@@ -172,7 +172,7 @@ class TestTreeRegression(unittest.TestCase):
         np.random.seed(42)
         self.tree_new.simulate()
         np.random.seed(42)
-        self.tree_new.Infection_Simulation("A")
+        self.tree_new.simulate_infection("A")
 
         np.random.seed(42)
         u = np.random.rand(len(self.observers))
@@ -189,7 +189,7 @@ class TestTreeRegression(unittest.TestCase):
         np.random.seed(42)
         self.tree_new.simulate()
         np.random.seed(42)
-        self.tree_new.Infection_Simulation("A")
+        self.tree_new.simulate_infection("A")
 
         np.random.seed(42)
         u = np.random.rand(len(self.observers))
@@ -226,7 +226,7 @@ class TestTreeRegression(unittest.TestCase):
         np.random.seed(42)
         tree_new.simulate()
         np.random.seed(42)
-        tree_new.Infection_Simulation("A")
+        tree_new.simulate_infection("A")
 
         np.random.seed(42)
         u = np.random.rand(len(obs))
@@ -245,7 +245,7 @@ class TestTreeRegression(unittest.TestCase):
         np.random.seed(42)
         self.tree_new.simulate()
         np.random.seed(42)
-        self.tree_new.Infection_Simulation("A")
+        self.tree_new.simulate_infection("A")
 
         np.random.seed(42)
         u = np.random.rand(len(self.observers))
@@ -258,7 +258,7 @@ class TestTreeRegression(unittest.TestCase):
         np.random.seed(42)
         self.tree_new.simulate()
         np.random.seed(42)
-        self.tree_new.Infection_Simulation("A")
+        self.tree_new.simulate_infection("A")
 
         np.random.seed(42)
         u = np.random.rand(len(self.observers))
@@ -271,7 +271,7 @@ class TestTreeRegression(unittest.TestCase):
         np.random.seed(42)
         self.tree_new.simulate()
         np.random.seed(42)
-        self.tree_new.Infection_Simulation("A")
+        self.tree_new.simulate_infection("A")
 
         np.random.seed(42)
         u = np.random.rand(len(self.observers))
@@ -284,7 +284,7 @@ class TestTreeRegression(unittest.TestCase):
         np.random.seed(42)
         self.tree_new.simulate()
         np.random.seed(42)
-        self.tree_new.Infection_Simulation("A")
+        self.tree_new.simulate_infection("A")
 
         saved_val = self.saved_results.get("localize")
         val = self.tree_new.localize()

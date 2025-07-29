@@ -91,12 +91,12 @@ print(tree.edge_delays)  # Access simulated delays for each edge
 
 ---
 
-#### `Infection_Simulation(source: str) -> None`
+#### `simulate_infection(source: str) -> None`
 
 Simulates infection spread times from a given source node to all observers, storing results in `self.infection_times`.
 
 ```
-tree.Infection_Simulation("nodeA")
+tree.simulate_infection("nodeA")
 print(tree.infection_times)  # Infection times per observer from source "nodeA"
 ```
 
@@ -131,12 +131,12 @@ print(value)
 
 ---
 
-#### `Equivalent_class(first_obs: str, outfile: str) -> List[str]`
+#### `get_equivalent_class(first_obs: str, outfile: str) -> List[str]`
 
 Computes the equivalence class of nodes sufficient for source estimation based on the first infected observer `first_obs`, writes the relevant subtree edges to `outfile`, and returns relevant observers.
 
 ```
-relevant_observers = tree.Equivalent_class("observer1", "subtree.json")
+relevant_observers = tree.get_equivalent_class("observer1", "subtree.json")
 print(relevant_observers)
 ```
 

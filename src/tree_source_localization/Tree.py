@@ -84,7 +84,7 @@ class Tree:
             self.edges[edge].sample()
     
     #Simulates the infection from a given source node to an observer node
-    def Infection_Simulation(
+    def simulate_infection(
         self,
         source: str
     ) -> None:
@@ -204,7 +204,7 @@ class Tree:
             mgf *= g_t*(t**(len(path)-1))*np.exp(-1*lam*t)*(math.factorial(len(path)-1))*prod
         return mgf
     
-    def Equivalent_Class(
+    def get_equivalent_class(
         self,
         first_obs: str,
         outfile: str

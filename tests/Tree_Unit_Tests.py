@@ -81,14 +81,14 @@ class TestTree(unittest.TestCase):
 
     def test_infection_simulation_sets_times(self):
         self.tree.simulate()
-        self.tree.Infection_Simulation("A")
+        self.tree.simulate_infection("A")
         for obs in self.observers:
             self.assertIn(obs, self.tree.infection_times)
             self.assertIsInstance(self.tree.infection_times[obs], (float, int))
 
     def test_joint_mgf_computation(self):
         self.tree.simulate()
-        self.tree.Infection_Simulation("A")
+        self.tree.simulate_infection("A")
         u = np.random.rand(len(self.observers))
         val = self.tree.joint_mgf(u, "A")
         self.assertIsInstance(val, float)
@@ -96,7 +96,7 @@ class TestTree(unittest.TestCase):
 
     def test_cond_joint_mgf_methods(self):
         self.tree.simulate()
-        self.tree.Infection_Simulation("A")
+        self.tree.simulate_infection("A")
         u = np.random.rand(len(self.observers))
         for method in [1, 2]:
             val = self.tree.cond_joint_mgf(u, "A", self.observers[0], method)
@@ -104,14 +104,14 @@ class TestTree(unittest.TestCase):
 
     def test_equivalent_class_output_validity(self):
         outfile = "test_equiv_class_tree.csv"
-        new_obs = self.tree.Equivalent_Class(self.observers[0], outfile)
+        new_obs = self.tree.get_equivalent_class(self.observers[0], outfile)
         self.assertTrue(set(new_obs).issubset(set(self.observers)))
         self.assertTrue(os.path.exists(outfile))
         os.remove(outfile)
 
     def test_obj_func_output_validity(self):
         self.tree.simulate()
-        self.tree.Infection_Simulation("A")
+        self.tree.simulate_infection("A")
         u = np.random.rand(len(self.observers))
         for method in [None, 1, 2]:
             val = self.tree.obj_func(u, "A", augment=method)
@@ -119,7 +119,7 @@ class TestTree(unittest.TestCase):
 
     def test_localize_returns_node(self):
         self.tree.simulate()
-        self.tree.Infection_Simulation("A")
+        self.tree.simulate_infection("A")
         loc = self.tree.localize()
         self.assertIn(loc, self.tree.nodes)
 
