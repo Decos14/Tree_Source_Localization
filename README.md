@@ -37,6 +37,7 @@ localize_source \
 --method method
 ```
 If you fail to provide one of the above the system will prompt you for it.
+
 ---
 ## Documentation
 ### Input JSON File Format
