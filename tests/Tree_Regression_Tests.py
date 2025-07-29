@@ -96,7 +96,7 @@ class TestTreeRegression(unittest.TestCase):
                 "Cond_Joint_MGF_1": cls.tree_new.cond_joint_mgf(u, "A", cls.observers[0], 1),
                 "Cond_Joint_MGF_2": cls.tree_new.cond_joint_mgf(u, "A", cls.observers[0], 2),
                 "Cond_Joint_MGF_3": cond_mgf_3_val,
-                "Objective_Function": cls.tree_new.obj_func(u, "A"),
+                "Objective_Function": cls.tree_new.objective_function(u, "A"),
                 "localize": cls.tree_new.localize(),
             }
             with open(REGRESSION_PATH, "wb") as f:
@@ -251,7 +251,7 @@ class TestTreeRegression(unittest.TestCase):
         u = np.random.rand(len(self.observers))
 
         saved_val = self.saved_results.get("Objective_Function")
-        val = self.tree_new.obj_func(u, "A")
+        val = self.tree_new.objective_function(u, "A")
         self.assertAlmostEqual(val, saved_val, places=5)
     
     def test_obj_func_1_match(self):
@@ -264,7 +264,7 @@ class TestTreeRegression(unittest.TestCase):
         u = np.random.rand(len(self.observers))
 
         saved_val = self.saved_results.get("Objective_Function")
-        val = self.tree_new.obj_func(u, "A", method='linear')
+        val = self.tree_new.objective_function(u, "A", method='linear')
         self.assertAlmostEqual(val, saved_val, places=5)
 
     def test_obj_func_2_match(self):
@@ -277,7 +277,7 @@ class TestTreeRegression(unittest.TestCase):
         u = np.random.rand(len(self.observers))
 
         saved_val = self.saved_results.get("Objective_Function")
-        val = self.tree_new.obj_func(u, "A", method='exponential')
+        val = self.tree_new.objective_function(u, "A", method='exponential')
         self.assertAlmostEqual(val, saved_val, places=5)
 
     def test_localize_output_match(self):

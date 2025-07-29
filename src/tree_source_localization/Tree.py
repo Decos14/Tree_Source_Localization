@@ -318,7 +318,15 @@ class Tree:
         Returns:
             str: Name of the predicted source node.
         """
-        observer_idx = np.zeros(len(self.nodes))
-        for i, node in enumerate(self.nodes):
-            observer_idx[i] = sp.optimize.minimize(self.objective_function, np.random.rand(len(self.observers)), args = (node,method),bounds = [(0,None) for _ in range(len(self.observers))],method='Nelder-Mead').fun
-        return self.nodes[np.argmax(observer_idx)]
+        results = {}
+        for node in self.nodes:
+            res = sp.optimize.minimize(
+                fun=self.objective_function,
+                x0=np.random.rand(len(self.observers)),
+                args=(node, method),
+                bounds=[(0, None)] * len(self.observers),
+                method='Nelder-Mead'
+            )
+            results[node] = res.fun
+
+        return max(results, key=results.get)

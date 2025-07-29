@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.0] - 2025-07-29
+
+### Changed
+- renamed obj_func to objective_function
+- cleaned up code for localize()
+- added typing to `__init__.py`
+
 ## [0.6.2] - 2025-07-29
 
 ### Changed

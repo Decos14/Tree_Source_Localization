@@ -114,7 +114,7 @@ class TestTree(unittest.TestCase):
         self.tree.simulate_infection("A")
         u = np.random.rand(len(self.observers))
         for method in [None, 'linear', 'exponential']:
-            val = self.tree.obj_func(u, "A", method=method)
+            val = self.tree.objective_function(u, "A", method=method)
             self.assertIsInstance(val, float)
 
     def test_localize_returns_node(self):
