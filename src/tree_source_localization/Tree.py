@@ -1,7 +1,7 @@
 import numpy as np
 import scipy as sp
 import json
-from typing import List, Set, FrozenSet
+from typing import List, Set, FrozenSet, Dict
 from numpy.typing import ArrayLike
 from .Search import _DepthFirstSearch
 from .MGFAugment import get_augmentation
@@ -11,7 +11,12 @@ from .EdgeDistribution import EdgeDistribution
 TreeEdge = FrozenSet[str]
 
 class Tree:
-    def __init__(self,file_name, observers, infection_times):
+    def __init__(
+        self,
+        file_name: str,
+        observers: List[str],
+        infection_times: Dict[int, str]
+    ) -> None:
         self.file_name = file_name
         self.build_tree(file_name)
         self.build_connection_tree()
@@ -262,7 +267,7 @@ class Tree:
         self._write_edges_to_json(all_edges, outfile)
 
 
-    def obj_func(
+    def objective_function(
         self,
         u: ArrayLike,
         source: str,
@@ -315,5 +320,5 @@ class Tree:
         """
         observer_idx = np.zeros(len(self.nodes))
         for i, node in enumerate(self.nodes):
-            observer_idx[i] = sp.optimize.minimize(self.obj_func, np.random.rand(len(self.observers)), args = (node,method),bounds = [(0,None) for i in range(len(self.observers))],method='Nelder-Mead').fun
+            observer_idx[i] = sp.optimize.minimize(self.objective_function, np.random.rand(len(self.observers)), args = (node,method),bounds = [(0,None) for _ in range(len(self.observers))],method='Nelder-Mead').fun
         return self.nodes[np.argmax(observer_idx)]
