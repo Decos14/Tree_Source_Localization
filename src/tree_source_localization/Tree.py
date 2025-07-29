@@ -65,11 +65,11 @@ class Tree:
         to the instance variable `self.A`.
         """
         A_matrix = {}
-        for _, node in enumerate(self.nodes):
+        for node in self.nodes:
             A_layer= np.zeros((len(self.observers),len(self.edges.keys())))
             for j, obs in enumerate(self.observers):
+                path = self.search.get_path(node,obs)
                 for k, edge in enumerate(self.edges.keys()):
-                    path = self.search.get_path(node,obs)
                     if edge in path:
                         A_layer[j,k]=1  
             A_matrix[node] = A_layer 

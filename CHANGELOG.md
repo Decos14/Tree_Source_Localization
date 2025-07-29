@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.1] - 2025-07-29
+
+### Changed
+- Cleaned up build_A_matrix logic
+
 ## [0.5.0] - 2025-07-29
 
 ### Changed
