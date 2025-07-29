@@ -7,13 +7,8 @@ from .Search import _DepthFirstSearch
 from .MGFAugment import get_augmentation
 from .EdgeDistribution import EdgeDistribution
 
-
-# Structure is [(distribution, parameters), [mgf, mgf', mgf''], edge delay]
-TreeValue = List[Union[Union[Tuple[str, float], Tuple[str, float, float]], Tuple[Callable[[float], float], Callable[[float], float], Callable[[float],float]], float]]
 #Structure is {node, node}
 TreeEdge = FrozenSet[str]
-
-TreeDatastructure = Dict[TreeEdge, TreeValue]
 
 class Tree:
     def __init__(self,file_name, observers, infection_times):
@@ -28,7 +23,7 @@ class Tree:
     def build_tree(
         self, 
         file_name: str
-    ) -> TreeDatastructure:
+    ) -> None:
         """
         Builds the tree data structure from a JSON file, initializing edges, nodes,
         distributions, parameters, delays, and moment generating functions as instance variables.
