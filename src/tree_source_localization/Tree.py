@@ -124,9 +124,9 @@ class Tree:
         """
         mgf = 1
         for i,edge in enumerate(self.edges.keys()):
-            tempval = np.matmul(u,self.A[source][:,i])
-            if tempval != 0:
-                mgf *= self.edges[edge].mgf(tempval)
+            relevant_u = np.matmul(u,self.A[source][:,i])
+            if relevant_u != 0:
+                mgf *= self.edges[edge].mgf(relevant_u)
         return mgf
     
     def cond_joint_mgf(
@@ -157,16 +157,16 @@ class Tree:
         path  = self.search.get_path(source, obs_o)
         for i,edge in enumerate(self.edges.keys()):
             if edge not in path:
-                tempval = np.matmul(u,self.A[source][:,i])
-                if tempval != 0:
-                    mgf *= self.edges[edge].mgf(tempval)
+                relevant_u = np.matmul(u,self.A[source][:,i])
+                if relevant_u  != 0:
+                    mgf *= self.edges[edge].mgf(relevant_u )
         
         if method == 1 and len(path) != 0:
-            tempval = 0
+            approx_value = 0
             for i,edge in enumerate(self.edges.keys()):
-                tempval += np.matmul(u,self.A[source][:,i])
-            tempval *= -self.infection_times[obs_o]/(len(path))
-            mgf *= np.exp(tempval)
+                approx_value += np.matmul(u,self.A[source][:,i])
+            approx_value *= -self.infection_times[obs_o]/(len(path))
+            mgf *= np.exp(approx_value)
 
         if method == 2 and len(path) != 0:
             b1 = 0
@@ -269,11 +269,11 @@ class Tree:
         val1 = np.exp(-1*np.dot(u,t))
         if augment != None:
             val1 = val1*((len(self.observers)-1)/(2*len(self.observers)-1))
-            tempval = 0
+            conditional_expectation = 0
             for o in self.observers:
-                tempval += self.cond_joint_mgf(u,source,o,method = augment)
-            tempval = tempval*(1/(2*len(self.observers)-1))
-            val1 += tempval
+                conditional_expectation += self.cond_joint_mgf(u,source,o,method = augment)
+            conditional_expectation = conditional_expectation*(1/(2*len(self.observers)-1))
+            val1 += conditional_expectation
         val = -1*(val1-val0)**2
         return val
 
@@ -294,7 +294,7 @@ class Tree:
         Returns:
             str: Name of the predicted source node.
 """
-        m = np.zeros(len(self.nodes))
+        observer_idx = np.zeros(len(self.nodes))
         for i, node in enumerate(self.nodes):
-            m[i] = sp.optimize.minimize(self.obj_func, np.random.rand(len(self.observers)), args = (node,method),bounds = [(0,None) for i in range(len(self.observers))],method='Nelder-Mead').fun
-        return self.nodes[np.argmax(m)]
+            observer_idx[i] = sp.optimize.minimize(self.obj_func, np.random.rand(len(self.observers)), args = (node,method),bounds = [(0,None) for i in range(len(self.observers))],method='Nelder-Mead').fun
+        return self.nodes[np.argmax(observer_idx)]
