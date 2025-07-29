@@ -41,7 +41,10 @@ class PositiveNormalDistribution(BaseDistribution):
         self.type = "N"
 
     def sample(self) -> float:
-        return np.random.normal(self.mu, self.sigma2)
+        val = -1
+        while val <= 0:
+            val = np.random.normal(self.mu, self.sigma2)
+        return val
 
     def mgf(self, t: float) -> float:
         return 1 if np.isclose(t, 0) else MGFFunctions.PositiveNormalMGF(t, self.mu, self.sigma2)

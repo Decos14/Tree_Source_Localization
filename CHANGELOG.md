@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.1] - 2025-07-29
+- fixed sample of positive normal to return positive normal instead of normal
+
 ## [0.6.0] - 2025-07-29
 - built a joint mgf augmentation registry
 - cleaned up code in cond_joint_mgf using it
