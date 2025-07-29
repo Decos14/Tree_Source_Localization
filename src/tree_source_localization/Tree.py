@@ -41,7 +41,7 @@ class Tree:
             raw_edges = json.load(file)
         
         self.edges = {
-            frozenset(ast.literal_eval(edge)) : EdgeDistribution(value['distribution'], value['parameters'])
+            frozenset(edge.split(',')) : EdgeDistribution(value['distribution'], value['parameters'])
             for edge, value in raw_edges.items()
         }
 

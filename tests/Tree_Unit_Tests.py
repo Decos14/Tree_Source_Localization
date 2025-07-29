@@ -11,33 +11,33 @@ class TestTree(unittest.TestCase):
     def setUp(self):
         self.temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w+', suffix='json')
         raw_edges = {
-            "('A', 'B')" : {
+            "A,B" : {
                 'distribution': 'N',
                 'parameters': {
                     'mu': 1.0,
                     'sigma2': 0.5
                 }
             },
-            "('B', 'C')" : {
+            "B,C" : {
                 'distribution': 'E',
                 'parameters': {
                     'lambda': 2.0
                 }
             },
-            "('C', 'D')" : {
+            "C,D" : {
                 'distribution': 'U',
                 'parameters': {
                     'start': 1.0,
                     'stop': 3.0
                 }
             },
-            "('D', 'E')" : {
+            "D,E" : {
                 'distribution': 'P',
                 'parameters': {
                     'lambda': 3.0
                 }
             },
-            "('E', 'F')" : {
+            "E,F" : {
                 'distribution': 'N',
                 'parameters': {
                     'mu': 1.0,

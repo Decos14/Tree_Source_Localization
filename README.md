@@ -29,7 +29,7 @@ Or clone the repository locally and install:
 ### Input JSON File Format
 The input format is a JSON file with the following format:
 ```
-{('node_name', 'node_name'): {distribution: 'distribution type', parameters : {'paramater1': value1, ...} } }
+{"node_name,node_name": {distribution: 'distribution type', parameters : {'paramater1': value1, ...} } }
 ```
 note that the order of the node names is irrelevant to the parsing of the tree.
 
@@ -44,20 +44,20 @@ Distribution type codes:
 Example:
 ```
 {
-    "('A', 'B')" : {
+    "A,B" : {
         'distribution's : 'N',
         'parameters' : {
             'mu': 3.0,
             'sigma2': 1.0
         }
   },
-    "('A', 'C')" : {
+    "A,C" : {
         'distribution' : 'E',
         'parameters' : {
             'lambda': 0.5
         }
     },
-    "('C', 'D')" : {
+    "C,D" : {
         'distribution' : 'U',
         'paramaters' : {
             'start' : 0.0,
