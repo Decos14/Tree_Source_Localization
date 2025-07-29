@@ -2,6 +2,7 @@ import unittest
 import pickle
 import numpy as np
 import copy
+import json
 import tempfile
 import os
 from tree_source_localization.Tree import Tree  # type: ignore
@@ -13,13 +14,43 @@ class TestTreeRegression(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
 
-        cls.temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w+', suffix='csv')
-        cls.temp_file.write("""A,B,N,mu=1.0;sigma2=0.5
-B,C,E,lambda=2.0
-C,D,U,start=1.0;stop=3.0
-D,E,P,lambda=3.0
-E,F,N,mu=1.0;sigma2=0.1
-""")
+        cls.temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w+', suffix='json')
+        raw_edges = {
+            "('A', 'B')" : {
+                'distribution': 'N',
+                'parameters': {
+                    'mu': 1.0,
+                    'sigma2': 0.5
+                }
+            },
+            "('B', 'C')" : {
+                'distribution': 'E',
+                'parameters': {
+                    'lambda': 2.0
+                }
+            },
+            "('C', 'D')" : {
+                'distribution': 'U',
+                'parameters': {
+                    'start': 1.0,
+                    'stop': 3.0
+                }
+            },
+            "('D', 'E')" : {
+                'distribution': 'P',
+                'parameters': {
+                    'lambda': 3.0
+                }
+            },
+            "('E', 'F')" : {
+                'distribution': 'N',
+                'parameters': {
+                    'mu': 1.0,
+                    'sigma2': 0.1
+                }
+            }
+        }
+        json.dump(raw_edges, cls.temp_file)
         cls.temp_file.close()
 
         cls.observers = ["C", "D", "F"]
@@ -171,8 +202,22 @@ E,F,N,mu=1.0;sigma2=0.1
         self.assertAlmostEqual(val, saved_val, places=3)
 
     def test_cond_joint_mgf_exp_approx_match(self):
-        temp_file_exp = tempfile.NamedTemporaryFile(delete=False, mode='w+')
-        temp_file_exp.write("A,B,E,lambda=2.0\nB,C,E,lambda=2.0\n")
+        temp_file_exp = tempfile.NamedTemporaryFile(delete=False, mode='w+', suffix='json')
+        raw_exp_edges = {
+            "('A', 'B')" : {
+                'distribution': 'E',
+                'parameters': {
+                    'lambda': 2.0
+                }
+            },
+            "('B','C')" : {
+                'distribution': 'E',
+                'parameters': {
+                    'lambda': 2.0
+                }
+            }
+        }
+        json.dump(raw_exp_edges, temp_file_exp)
         temp_file_exp.close()
         obs = ["C"]
         times = {"C": 0.0}

@@ -3,18 +3,49 @@ import numpy as np
 import tempfile
 import os
 import copy
+import json
 from tree_source_localization.Tree import Tree  # type: ignore
 
 class TestTree(unittest.TestCase):
 
     def setUp(self):
-        self.temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w+', suffix='csv')
-        self.temp_file.write("""A,B,N,mu=1.0;sigma2=0.5
-B,C,E,lambda=2.0
-C,D,U,start=1.0;stop=3.0
-D,E,P,lambda=3.0
-E,F,N,mu=1.0;sigma2=0.1
-""")
+        self.temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w+', suffix='json')
+        raw_edges = {
+            "('A', 'B')" : {
+                'distribution': 'N',
+                'parameters': {
+                    'mu': 1.0,
+                    'sigma2': 0.5
+                }
+            },
+            "('B', 'C')" : {
+                'distribution': 'E',
+                'parameters': {
+                    'lambda': 2.0
+                }
+            },
+            "('C', 'D')" : {
+                'distribution': 'U',
+                'parameters': {
+                    'start': 1.0,
+                    'stop': 3.0
+                }
+            },
+            "('D', 'E')" : {
+                'distribution': 'P',
+                'parameters': {
+                    'lambda': 3.0
+                }
+            },
+            "('E', 'F')" : {
+                'distribution': 'N',
+                'parameters': {
+                    'mu': 1.0,
+                    'sigma2': 0.1
+                }
+            }
+        }
+        json.dump(raw_edges, self.temp_file)
         self.temp_file.close()
 
         self.observers = ["C", "D", "F"]

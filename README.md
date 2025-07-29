@@ -7,7 +7,7 @@ A Python package for modeling infection source localization on tree graphs with 
 
 - [Installation](#installation)
 - [Documentation](#documentation)
-  - [Inputs](#input-csv-file-format)
+  - [Inputs](#input-json-file-format)
   - [Usage](#key-methods-documentation-and-examples)
 - [Changelog](#changelog)
 
@@ -26,15 +26,14 @@ Or clone the repository locally and install:
    ```
 ---
 ## Documentation
-### Input CSV File Format
+### Input JSON File Format
+The input format is a JSON file with the following format:
+```
+{('node_name', 'node_name'): {distribution: 'distribution type', parameters : {'paramater1': value1, ...} } }
+```
+note that the order of the node names is irrelevant to the parsing of the tree.
 
-Each line represents an edge with columns:
-
-| Index      | 1                  | 2                   | 3                      |4                                         |
-|------------|--------------------|---------------------|------------------------|---------------------------------------------|
-| Description| First node (string)| Second node (string)| Distribution type (str)|Distribution parameters (one or more key, float pairs seperated by semicolons) |
-
-Distribution codes:
+Distribution type codes:
 
 - 'N': Positive Normal  
 - 'E': Exponential  
@@ -44,9 +43,28 @@ Distribution codes:
 
 Example:
 ```
-A,B,N,mu=3.0;sigma2=1.0
-A,C,E,lambda=0.5
-C,D,U,start=0;stop=5
+{
+    "('A', 'B')" : {
+        'distribution's : 'N',
+        'parameters' : {
+            'mu': 3.0,
+            'sigma2': 1.0
+        }
+  },
+    "('A', 'C')" : {
+        'distribution' : 'E',
+        'parameters' : {
+            'lambda': 0.5
+        }
+    },
+    "('C', 'D')" : {
+        'distribution' : 'U',
+        'paramaters' : {
+            'start' : 0.0,
+            'stop' : 1.0
+        }
+    }
+}
 ```
 ---
 
@@ -54,10 +72,10 @@ C,D,U,start=0;stop=5
 
 #### `build_tree(file_name: str) -> None`
 
-Builds the tree data structure from a CSV file, parsing edges, nodes, distributions, parameters, delays, and MGF functions.
+Builds the tree data structure from a JSON file, parsing edges, nodes, distributions, parameters, delays, and MGF functions.
 
 ```
-tree.build_tree("tree_topology.csv")
+tree.build_tree("tree_topology.json")
 ```
 
 ---
@@ -118,7 +136,7 @@ print(value)
 Computes the equivalence class of nodes sufficient for source estimation based on the first infected observer `first_obs`, writes the relevant subtree edges to `outfile`, and returns relevant observers.
 
 ```
-relevant_observers = tree.Equivalent_class("observer1", "subtree.csv")
+relevant_observers = tree.Equivalent_class("observer1", "subtree.json")
 print(relevant_observers)
 ```
 

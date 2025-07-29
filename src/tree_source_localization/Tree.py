@@ -1,12 +1,12 @@
 import numpy as np
 import scipy as sp
-import csv
+import json
 import math
 from typing import Dict, List, Tuple, Callable, Union, FrozenSet
 from numpy.typing import ArrayLike
 from .Search import _DepthFirstSearch
+import ast
 from .EdgeDistribution import EdgeDistribution
-from tree_source_localization import MGF_Functions
 
 
 # Structure is [(distribution, parameters), [mgf, mgf', mgf''], edge delay]
@@ -31,37 +31,21 @@ class Tree:
         file_name: str
     ) -> TreeDatastructure:
         """
-        Builds the tree data structure from a CSV file, initializing edges, nodes,
+        Builds the tree data structure from a JSON file, initializing edges, nodes,
         distributions, parameters, delays, and moment generating functions as instance variables.
 
         Args:
-            file_name (str): Path to the CSV file describing the tree.
+            file_name (str): Path to the JSON file describing the tree.
         """
-        with open(file_name, newline='', encoding='utf-8') as filestream:
-            reader = csv.reader(filestream)
-            
-            self.nodes = set()
-            self.edges = {}
+        with open(file_name, 'r', encoding='utf-8') as file:
+            raw_edges = json.load(file)
+        
+        self.edges = {
+            frozenset(ast.literal_eval(edge)) : EdgeDistribution(value['distribution'], value['parameters'])
+            for edge, value in raw_edges.items()
+        }
 
-            for row in reader:
-                if not row or row[0].startswith('#'):
-                    continue
-
-                node1, node2 = row[0], row[1]
-                dist_type = row[2]
-                raw_params = row[3]
-
-                # Convert "mu=3.0;sigma2=1.0" → {'mu': 3.0, 'sigma2': 1.0}
-                param_dict = {
-                    k: float(v)
-                    for k, v in (item.split('=') for item in raw_params.split(';'))
-                }
-
-                edge = frozenset({node1, node2})
-                self.nodes.update(edge)
-                self.edges[edge] = EdgeDistribution(dist_type, param_dict)
-
-            self.nodes = list(self.nodes)
+        self.nodes = list(set().union(*list(self.edges.keys())))
         
     def build_connection_tree(self) -> None:
         """
