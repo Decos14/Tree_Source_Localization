@@ -6,6 +6,7 @@ A Python package for modeling infection source localization on tree graphs with 
 ## Table of Contents
 
 - [Installation](#installation)
+- [Command Line Interaction](#cli)
 - [Documentation](#documentation)
   - [Inputs](#input-json-file-format)
   - [Usage](#key-methods-documentation-and-examples)
@@ -24,6 +25,18 @@ Or clone the repository locally and install:
    cd Tree_Source_Localization
    pip install .
    ```
+---
+### Command Line Interaction
+Once the package is pip installed you can run a localization from the command line using the localize_source command:
+### Example
+```
+localize_source \
+--tree_path tree.json \
+--observers a, b, c \
+--infection_times infection_times.json \
+--method method
+```
+If you fail to provide one of the above the system will prompt you for it.
 ---
 ## Documentation
 ### Input JSON File Format

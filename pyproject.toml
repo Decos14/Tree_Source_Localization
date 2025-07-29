@@ -1,6 +1,6 @@
 [project]
-name = "Tree_Source_Localization"
-version = "0.8.0"
+name = "tree-source-localization"
+version = "0.9.0"
 readme = "README.md"
 description = "A package for source localization on tree infection networks"
 authors = [
@@ -20,3 +20,6 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools]
 packages = ["tree_source_localization"]
 package-dir = {"" = "src"}
+
+[project.scripts]
+localize_source = "tree_source_localization.cli:main"
