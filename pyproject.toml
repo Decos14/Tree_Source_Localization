@@ -23,3 +23,9 @@ package-dir = {"" = "src"}
 
 [project.scripts]
 localize_source = "tree_source_localization.cli:main"
+
+[tool.ruff.lint]
+select = ["F", "E", "B", "I", "TID", "PL", "ANN", "W", "PIE", "PERF", "NPY", "FURB", "RUF"]
+ignore = ["NPY002"]
+[tool.ruff]
+line-length = 120

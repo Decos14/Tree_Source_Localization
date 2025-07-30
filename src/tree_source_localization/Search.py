@@ -1,39 +1,34 @@
-from typing import List, FrozenSet
+from typing import Dict, FrozenSet, List
 
 TreeEdge = FrozenSet[str]
 
-class _DepthFirstSearch():
-    def __init__(self, connection_tree):
+
+class _DepthFirstSearch:
+    def __init__(self, connection_tree: Dict[str, str]) -> None:
         self.cached_paths = {}
         self.connection_tree = connection_tree
 
-    def get_path(
-        self,
-        start: str,
-        stop: str
-        ):
-        '''
+    def get_path(self, start: str, stop: str) -> List[TreeEdge]:
+        """
         Uses a lazy cache to find and store if new the path between two nodes
 
         Args:
             start (str): The start of the path
             stop (str): The end of the path
-        
+
         Returns:
             List[TreeEdge]: Sequence of edges representing the path between start and stop.
-        '''
+        """
         key = (start, stop)
 
         if key not in self.cached_paths:
             path = self._dfs(start, stop)
             self.cached_paths[key] = path
             self.cached_paths[(stop, start)] = list(reversed(path))
-        
+
         return self.cached_paths[key]
-    
-    def _path_edge(self,
-        path: List[str]
-    ) -> List[TreeEdge]:
+
+    def _path_edge(self, path: List[str]) -> List[TreeEdge]:
         """
         Converts a path given as a sequence of nodes into a sequence of edges.
 
@@ -43,13 +38,9 @@ class _DepthFirstSearch():
         Returns:
             List[TreeEdge]: Sequence of edges representing the path.
         """
-        return [frozenset((path[i], path[i+1])) for i in range(len(path) - 1)]
+        return [frozenset((path[i], path[i + 1])) for i in range(len(path) - 1)]
 
-    def _dfs(
-        self,
-        source: str,
-        observer: str
-    ) -> List[str]:
+    def _dfs(self, source: str, observer: str) -> List[str]:
         """
         Finds the path from a source node to an observer using depth-first search.
 
@@ -69,4 +60,5 @@ class _DepthFirstSearch():
                     return self._path_edge(path)
                 visited.add(vertex)
                 for neighbor in self.connection_tree[vertex]:
-                    stack.append((neighbor,path + [neighbor]))
+                    new_value = (neighbor, [*path, neighbor])
+                    stack.append(new_value)

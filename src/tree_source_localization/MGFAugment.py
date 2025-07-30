@@ -1,10 +1,12 @@
-import numpy as np
-import scipy as sp
 import math
-from numpy.typing import ArrayLike
 from typing import Callable
 
+import numpy as np
+import scipy as sp
+from numpy.typing import ArrayLike
+
 augmentation_registry: dict[str, Callable[[ArrayLike, np.ndarray, float, list, dict], float]] = {}
+
 
 def register_augmentation(name: str) -> Callable:
     """
@@ -16,10 +18,13 @@ def register_augmentation(name: str) -> Callable:
     Returns:
         Callable: The decorator that registers the augmentation function.
     """
+
     def wrapper(func: Callable[[ArrayLike, np.ndarray, float, list, dict], float]) -> Callable:
         augmentation_registry[name] = func
         return func
+
     return wrapper
+
 
 def get_augmentation(name: str) -> Callable[[ArrayLike, np.ndarray, float, list, dict], float]:
     """
@@ -31,17 +36,14 @@ def get_augmentation(name: str) -> Callable[[ArrayLike, np.ndarray, float, list,
     Returns:
         Callable: The registered augmentation function.
     """
-    return augmentation_registry[name]
+    try:
+        return augmentation_registry[name]
+    except KeyError as error:
+        raise ValueError(f"Augmentation name: {name} is invalid") from error
 
 
 @register_augmentation("linear")
-def linear_augmentation(
-    u: ArrayLike,
-    A_row: np.ndarray,
-    infection_time: float,
-    path: list,
-    edges: dict
-) -> float:
+def linear_augmentation(u: ArrayLike, A_row: np.ndarray, infection_time: float, path: list, edges: dict) -> float:
     """
     Linear approximation for conditional joint MGF.
 
@@ -56,20 +58,14 @@ def linear_augmentation(
         float: The linear approximation factor.
     """
     approx_value = 0.0
-    for i, edge in enumerate(edges.keys()):
+    for i, _ in enumerate(edges.keys()):
         approx_value += np.matmul(u, A_row[:, i])
     approx_value *= -infection_time / len(path)
     return np.exp(approx_value)
 
 
 @register_augmentation("exponential")
-def exponential_augmentation(
-    u: ArrayLike,
-    A_row: np.ndarray,
-    infection_time: float,
-    path: list,
-    edges: dict
-) -> float:
+def exponential_augmentation(u: ArrayLike, A_row: np.ndarray, infection_time: float, path: list, edges: dict) -> float:
     """
     Exponential approximation for conditional joint MGF.
 
@@ -86,8 +82,12 @@ def exponential_augmentation(
     b1 = 0.0
     b2 = 0.0
     for i, edge in enumerate(edges.keys()):
-        b2 += edges[edge].mgf_derivative2(0) - edges[edge].mgf_derivative(0)**2
+        b2 += edges[edge].mgf_derivative2(0) - edges[edge].mgf_derivative(0) ** 2
         b1 += np.matmul(u, A_row[:, i]) * b2
+    if b2 == 0:
+        raise ZeroDivisionError(
+            "Sum of second derivatives at 0 minus sum of first derivatives at zero squared is zero; cannot divide."
+        )
     b = b1 / b2
     a1 = 0.0
     for i, edge in enumerate(edges.keys()):
@@ -98,11 +98,7 @@ def exponential_augmentation(
 
 @register_augmentation("exact")
 def exact_exponential_augmentation(
-    u: ArrayLike,
-    A_row: np.ndarray,
-    infection_time: float,
-    path: list,
-    edges: dict
+    u: ArrayLike, A_row: np.ndarray, infection_time: float, path: list, edges: dict
 ) -> float:
     """
     Exact exponential solution for iid exponential delays.
@@ -122,7 +118,7 @@ def exact_exponential_augmentation(
     prod = 1.0
     for i, edge in enumerate(path):
         if i == 0:
-            lam = edges[edge].params['lambda']
+            lam = edges[edge].params["lambda"]
         prod *= 1 / (lam + np.matmul(u, A_row[:, i]))
         Theta[i, i] = -1 * (lam + np.matmul(u, A_row[:, i]))
         if i != len(path) - 1:
@@ -131,4 +127,6 @@ def exact_exponential_augmentation(
     alpha[0, 0] = 1
     exp_Theta = sp.linalg.expm(infection_time * Theta)
     g_t = -1 * np.matmul(np.matmul(np.matmul(alpha, exp_Theta), Theta), np.ones((1, len(path), 1)))
-    return g_t * (infection_time ** (len(path) - 1)) * np.exp(-lam * infection_time) * math.factorial(len(path) - 1) * prod
+    return (
+        g_t * (infection_time ** (len(path) - 1)) * np.exp(-lam * infection_time) * math.factorial(len(path) - 1) * prod
+    )
