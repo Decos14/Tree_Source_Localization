@@ -1,8 +1,10 @@
 # Tree Source Localization
 
 A Python package for modeling infection source localization on tree graphs with probabilistic edge delay distributions using Moment Generating Functions.
+The repository can be found at [text](https://github.com/Decos14/tree-source-localization)
 
 ---
+
 ## Table of Contents
 
 - [Installation](#installation)
@@ -13,22 +15,29 @@ A Python package for modeling infection source localization on tree graphs with 
 - [Changelog](#changelog)
 
 ---
-## Installation
-To install directly:
-   ```
-   pip install git+https://github.com/Decos14/Tree_Source_Localization.git
-   ```
-Or clone the repository locally and install:
 
-   ```
-   git clone https://github.com/yourusername/Tree_Source_Localization.git
-   cd Tree_Source_Localization
-   pip install .
-   ```
+## Installation
+
+To install the current build directly:
+
+```
+pip install tree-source-localization
+```
+
+Or to install the latest version from github:
+
+```
+pip install git+https://github.com/Decos14/Tree_Source_Localization.git
+```
+
 ---
+
 ### Command Line Interaction
+
 Once the package is pip installed you can run a localization from the command line using the localize_source command:
+
 ### Example
+
 ```
 localize_source \
 --tree_path tree.json \
@@ -36,26 +45,33 @@ localize_source \
 --infection_times infection_times.json \
 --method method
 ```
+
 If you fail to provide one of the above the system will prompt you for it.
 
 ---
+
 ## Documentation
+
 ### Input JSON File Format
+
 The input format is a JSON file with the following format:
+
 ```
 {"node_name,node_name": {distribution: 'distribution type', parameters : {'paramater1': value1, ...} } }
 ```
+
 note that the order of the node names is irrelevant to the parsing of the tree.
 
 Distribution type codes:
 
-- 'N': Positive Normal  
-- 'E': Exponential  
-- 'U': Uniform  
-- 'P': Poisson  
+- 'N': Positive Normal
+- 'E': Exponential
+- 'U': Uniform
+- 'P': Poisson
 - 'C': Absolute Cauchy
 
 Example:
+
 ```
 {
     "A,B" : {
@@ -80,6 +96,7 @@ Example:
     }
 }
 ```
+
 ---
 
 ### Key Methods Documentation and Examples
