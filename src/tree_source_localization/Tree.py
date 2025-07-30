@@ -20,7 +20,7 @@ class Tree:
         self,
         file_name: str,
         observers: List[str],
-        infection_times: Dict[str, int],
+        infection_times: Optional[Dict[str, int]] = None,
     ) -> None:
         self.file_name = file_name
         self._build_tree(file_name)
@@ -32,15 +32,17 @@ class Tree:
             raise ValueError(
                 f"All observers must be valid nodes in the tree. Invalid: {set(observers) - set(self.nodes)}",
             )
-        if set(infection_times.keys()) != set(observers):
-            raise ValueError(
-                "Infection time keys must match observer list exactly.\n"
-                f"Missing: {set(observers) - set(infection_times.keys())}, "
-                f"Extra: {set(infection_times.keys()) - set(observers)}",
-            )
-        non_numeric = {k: v for k, v in infection_times.items() if not isinstance(v, (int, float))}
-        if non_numeric:
-            raise TypeError(f"Infection times must be numeric. Invalid values: {non_numeric}")
+        if infection_times is None:
+            infection_times = {observer: 0.0 for observer in observers}
+        else:
+            if not all(isinstance(value, (int, float)) for value in infection_times.values()):
+                raise ValueError("Non-numeric values in infection times")
+            if set(infection_times.keys()) != set(observers):
+                raise ValueError(
+                    "Infection time keys must match observer list exactly.\n"
+                    f"Missing: {set(observers) - set(infection_times.keys())}, "
+                    f"Extra: {set(infection_times.keys()) - set(observers)}",
+                )
         if any(len(adj) == 0 for adj in self.connection_tree.values()):
             raise ValueError("Disconnected node(s) found in the tree structure.")
 

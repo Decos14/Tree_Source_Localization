@@ -2,7 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.9.1] -2025-07-30
+## [1.0.0] - 2025-0-30
+
+### Changed:
+
+- Infection times is now an optional parameter to build a tree
+
+## [0.9.1] - 2025-07-30
 
 ### Added
 

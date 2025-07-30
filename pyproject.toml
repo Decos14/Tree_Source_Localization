@@ -1,6 +1,6 @@
 [project]
 name = "tree-source-localization"
-version = "0.9.0"
+version = "1.0.0"
 readme = "README.md"
 description = "A package for source localization on tree infection networks"
 authors = [
