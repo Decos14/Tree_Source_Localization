@@ -19,7 +19,6 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    # Prompt for any missing arguments
     if args.tree_path is None:
         tree_path = input("Enter path to tree JSON file: ").strip()
     else:
@@ -38,13 +37,11 @@ def main() -> None:
     with open(infection_path, "r") as f:
         infection_times = json.load(f)
 
-    # Optional method
     method = args.method
     if method is None:
         method_input = input("Enter method (linear, exponential, exact) or leave blank: ").strip()
         method = method_input if method_input else None
 
-    # Run localization
     tree = Tree(file_name=tree_path, observers=observers, infection_times=infection_times)
     source = tree.localize(method=method)
     print(f"\nMost likely source node: {source}")

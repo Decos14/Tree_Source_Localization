@@ -9,7 +9,7 @@ from numpy.typing import ArrayLike
 
 from .EdgeDistribution import EdgeDistribution
 from .MGFAugment import get_augmentation
-from .Search import _DepthFirstSearch
+from .Search import DepthFirstSearch
 
 # Structure is {node, node}
 TreeEdge = FrozenSet[str]
@@ -26,7 +26,7 @@ class Tree:
         self._build_tree(file_name)
         self._build_connection_tree()
 
-        if not observers:
+        if len(observers) == 0:
             raise ValueError("Observer list cannot be empty.")
         if not set(observers).issubset(set(self.nodes)):
             raise ValueError(
@@ -48,7 +48,7 @@ class Tree:
 
         self.infection_times = infection_times
         self.observers = observers
-        self._search = _DepthFirstSearch(self.connection_tree)
+        self._search = DepthFirstSearch(self.connection_tree)
         self._build_A_matrix()
 
     def _build_tree(

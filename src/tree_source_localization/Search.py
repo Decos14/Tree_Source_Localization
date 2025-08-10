@@ -3,7 +3,7 @@ from typing import Dict, FrozenSet, List
 TreeEdge = FrozenSet[str]
 
 
-class _DepthFirstSearch:
+class DepthFirstSearch:
     def __init__(self, connection_tree: Dict[str, str]) -> None:
         self.cached_paths = {}
         self.connection_tree = connection_tree

@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.2] - 2025-08-10
+
+### Fixed
+
+- bug preventing the use numpy arrays for observer lists
+
+### Changed
+
+- Removed leading underscore for DepthFirstSearch class since it is used outside of it's file
+- Renamed A_row to A_slice in MGFAugment for naming clarity
+
 ## [1.0.1] - 2025-07-30
 
 ### Added:
